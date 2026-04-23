@@ -33,7 +33,7 @@ const CACHE_NAME = 'neural-sync-v1';
 */
 const PRECACHE = [
   '.',
-  './neural_sync_game.html',
+  './index.html',
   './manifest.json',
   'https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap',
   'https://fonts.gstatic.com/s/orbitron/v31/yMJMMIlzdpvBhQQL_SC3X9yhF25-T1nyGy6BoWgz.woff2',
