@@ -43,6 +43,7 @@
   /* 5th pad — white/silver */
   --white:#e8e8f0; --white-d:#1e1e2e; --white-dp:#3a3a5c;
   --nav-h:58px;
+  --header-h:46px;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -52,14 +53,17 @@
 body{background:var(--bg);color:var(--text);font-family:'Orbitron',monospace;height:100dvh;overflow:hidden;position:relative}
 body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;opacity:.25;pointer-events:none;z-index:0}
 .app{position:fixed;inset:0;z-index:1;display:flex;flex-direction:column;align-items:center}
+.top-header{
+  width:100%;max-width:480px;height:var(--header-h);flex-shrink:0;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 .75rem;
+  background:rgba(10,10,15,.95);
+  border-bottom:1px solid var(--border);
+  z-index:20;
+}
 .page-area{flex:1;width:100%;max-width:480px;position:relative;overflow:hidden}
-.page{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;overflow-y:auto;overflow-x:hidden;padding:1rem 1.1rem 1.2rem;gap:.85rem;-webkit-overflow-scrolling:touch}
+.page{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;overflow-y:auto;overflow-x:hidden;padding:.85rem 1.1rem 1.2rem;gap:.85rem;-webkit-overflow-scrolling:touch}
 .page.active{display:flex}
-
-/* ══════════════════════════════════════════════
-   BOTTOM NAV
-══════════════════════════════════════════════ */
-.bottom-nav{width:100%;max-width:480px;height:var(--nav-h);flex-shrink:0;display:flex;background:var(--surface);border-top:1px solid var(--border)}
 .nav-btn{flex:1;background:none;border:none;border-top:2px solid transparent;color:var(--dim);font-family:'Share Tech Mono',monospace;font-size:.52rem;letter-spacing:.08em;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:color .2s,border-color .2s;position:relative}
 .nav-btn.active{color:var(--accent);border-top-color:var(--accent)}
 .nav-btn:hover{color:var(--text)}
@@ -73,8 +77,243 @@ body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(
 .ach-toast{position:fixed;top:.8rem;left:50%;transform:translateX(-50%) translateY(-130%);background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:.5rem 1.1rem;font-family:'Share Tech Mono',monospace;font-size:.66rem;letter-spacing:.1em;color:var(--accent);white-space:nowrap;z-index:200;transition:transform .4s cubic-bezier(.175,.885,.32,1.275)}
 .ach-toast.show{transform:translateX(-50%) translateY(0)}
 .ach-toast .tn{color:var(--yellow);font-weight:700}
-.mute-btn{position:fixed;top:.8rem;right:.8rem;background:var(--surface);border:1px solid var(--border);color:var(--dim);font-size:1rem;width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:color .2s,border-color .2s;z-index:10}
-.mute-btn:hover{color:var(--text);border-color:var(--accent)}
+/* ══════════════════════════════════════════════
+   BOTTOM NAV
+══════════════════════════════════════════════ */
+.bottom-nav{width:100%;max-width:480px;height:var(--nav-h);flex-shrink:0;display:flex;background:var(--surface);border-top:1px solid var(--border)}
+.header-burger{
+  width:34px;height:34px;background:none;border:none;
+  cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:5px;padding:4px;
+  border-radius:8px;transition:background .2s;
+}
+.header-burger:hover{background:var(--border)}
+.burger-line{
+  width:18px;height:1.5px;background:var(--dim);border-radius:2px;
+  transition:background .2s;
+}
+.header-burger:hover .burger-line{background:var(--accent)}
+.header-title{
+  font-family:'Orbitron',monospace;font-size:.7rem;
+  font-weight:700;letter-spacing:.18em;color:var(--accent);
+  text-transform:uppercase;flex:1;text-align:center;
+  /* don't let title overlap buttons */
+  padding:0 2.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.header-mute{
+  width:34px;height:34px;background:none;border:none;
+  color:var(--dim);font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:8px;transition:color .2s,background .2s;
+}
+.header-mute:hover{color:var(--text);background:var(--border)}
+
+/* ══════════════════════════════════════════════
+   SLIDE-IN DRAWER
+   Opens from the left. Dark backdrop behind it.
+══════════════════════════════════════════════ */
+.drawer-backdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,0);
+  z-index:80;pointer-events:none;
+  transition:background .3s;
+}
+.drawer-backdrop.open{background:rgba(0,0,0,.55);pointer-events:all}
+
+.drawer{
+  position:fixed;top:0;left:0;bottom:0;
+  width:min(300px,82vw);
+  background:var(--surface);border-right:1px solid var(--border);
+  z-index:90;display:flex;flex-direction:column;
+  transform:translateX(-100%);
+  transition:transform .32s cubic-bezier(.22,.68,0,1.2);
+  overflow:hidden;
+}
+.drawer.open{transform:translateX(0)}
+
+.drawer-header{
+  padding:1.1rem 1rem .9rem;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.drawer-logo{
+  font-family:'Orbitron',monospace;font-weight:900;
+  font-size:.95rem;letter-spacing:.2em;color:var(--accent);
+}
+.drawer-close{
+  width:30px;height:30px;background:none;border:none;
+  color:var(--dim);font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:6px;transition:color .2s,background .2s;
+}
+.drawer-close:hover{color:var(--text);background:var(--border)}
+
+/* Player identity card inside drawer */
+.drawer-player-card{
+  margin:.7rem .8rem .4rem;
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:12px;padding:.75rem .9rem;
+}
+.drawer-callsign{
+  font-family:'Orbitron',monospace;font-size:1.1rem;
+  font-weight:900;letter-spacing:.15em;color:var(--accent);
+  display:block;
+}
+.drawer-player-meta{
+  font-family:'Share Tech Mono',monospace;font-size:.52rem;
+  color:var(--dim);letter-spacing:.1em;margin-top:.3rem;
+  display:flex;gap:.8rem;
+}
+.drawer-meta-item span{color:var(--text);font-weight:700}
+
+/* Drawer navigation links */
+.drawer-nav{flex:1;padding:.4rem .5rem;overflow-y:auto}
+.drawer-nav-item{
+  display:flex;align-items:center;gap:.8rem;
+  padding:.7rem .65rem;border-radius:10px;cursor:pointer;
+  transition:background .18s;border:none;background:none;
+  width:100%;text-align:left;
+}
+.drawer-nav-item:hover{background:var(--bg)}
+.drawer-nav-item.active-page{background:rgba(184,184,255,.08)}
+.drawer-nav-item.active-page .drawer-nav-label{color:var(--accent)}
+.drawer-nav-icon{
+  font-size:1.1rem;width:28px;text-align:center;flex-shrink:0;
+}
+.drawer-nav-texts{flex:1}
+.drawer-nav-label{
+  font-size:.72rem;font-weight:700;letter-spacing:.08em;
+  color:var(--text);display:block;font-family:'Orbitron',monospace;
+}
+.drawer-nav-sub{
+  font-family:'Share Tech Mono',monospace;font-size:.5rem;
+  color:var(--dim);letter-spacing:.06em;margin-top:1px;display:block;
+}
+.drawer-nav-badge{
+  font-family:'Share Tech Mono',monospace;font-size:.48rem;
+  background:var(--border);color:var(--dim);
+  padding:2px 6px;border-radius:5px;
+}
+
+.drawer-divider{
+  height:1px;background:var(--border);margin:.3rem .8rem;
+}
+
+.drawer-footer{
+  padding:.65rem .9rem;border-top:1px solid var(--border);
+  font-family:'Share Tech Mono',monospace;font-size:.48rem;
+  color:var(--dim);letter-spacing:.1em;
+}
+
+/* ══════════════════════════════════════════════
+   SUB-PANEL SYSTEM
+   Settings categories slide in from the right.
+══════════════════════════════════════════════ */
+.sub-panel{
+  position:absolute;inset:0;
+  background:var(--bg);z-index:15;
+  display:flex;flex-direction:column;
+  transform:translateX(105%);
+  transition:transform .3s cubic-bezier(.22,.68,0,1.2);
+  overflow:hidden;
+}
+.sub-panel.sp-open{transform:translateX(0)}
+
+.sub-panel-header{
+  display:flex;align-items:center;gap:.6rem;
+  padding:.75rem 1rem;
+  border-bottom:1px solid var(--border);
+  flex-shrink:0;
+}
+.sp-back{
+  width:30px;height:30px;background:none;border:none;
+  color:var(--dim);font-size:1.1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:6px;transition:color .2s;flex-shrink:0;
+}
+.sp-back:hover{color:var(--accent)}
+.sub-panel-title{
+  font-family:'Orbitron',monospace;font-size:.8rem;
+  font-weight:700;letter-spacing:.12em;color:var(--text);
+}
+
+.sub-panel-body{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:.9rem 1rem 1.5rem;
+  display:flex;flex-direction:column;gap:.75rem;
+}
+
+/* ══════════════════════════════════════════════
+   SETTINGS — CARD GRID (main settings page)
+   Large tappable cards, each opening a sub-panel.
+══════════════════════════════════════════════ */
+.settings-menu{
+  display:flex;flex-direction:column;gap:.55rem;width:100%;
+}
+.settings-card{
+  display:flex;align-items:center;gap:.9rem;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:.9rem 1rem;cursor:pointer;
+  transition:border-color .2s,transform .12s,background .2s;
+  width:100%;text-align:left;
+}
+.settings-card:hover{border-color:var(--accent);transform:scale(1.01)}
+.settings-card:active{transform:scale(.98)}
+.sc-icon{
+  font-size:1.4rem;width:38px;height:38px;
+  background:var(--bg);border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.sc-texts{flex:1}
+.sc-title{
+  font-size:.75rem;font-weight:700;letter-spacing:.08em;
+  color:var(--text);display:block;margin-bottom:2px;
+}
+.sc-desc{
+  font-family:'Share Tech Mono',monospace;font-size:.52rem;
+  color:var(--dim);letter-spacing:.05em;line-height:1.4;
+}
+.sc-arrow{color:var(--dim);font-size:.9rem;flex-shrink:0}
+.settings-card:hover .sc-arrow{color:var(--accent)}
+
+/* Sub-panel: shared row and toggle styles (same as before) */
+.settings-section{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:.75rem .9rem;border-bottom:1px solid var(--border);gap:.7rem}
+.settings-row:last-child{border-bottom:none}
+.settings-row-info{flex:1}
+.settings-row-title{font-size:.72rem;font-weight:700;color:var(--text);display:block;margin-bottom:3px}
+.settings-row-desc{font-family:'Share Tech Mono',monospace;font-size:.52rem;color:var(--dim);letter-spacing:.05em;line-height:1.45}
+.settings-row-action{font-family:'Share Tech Mono',monospace;font-size:.52rem;color:var(--accent);letter-spacing:.06em;cursor:pointer;border:none;background:none;padding:.25rem .5rem;border-radius:5px;border:1px solid var(--accent);transition:background .2s,color .2s}
+.settings-row-action:hover{background:var(--accent);color:var(--bg)}
+.toggle-wrap{position:relative;flex-shrink:0}
+.toggle-wrap input[type="checkbox"]{display:none}
+.toggle-wrap label{display:block;width:40px;height:22px;border-radius:11px;background:var(--border);cursor:pointer;position:relative;transition:background .25s}
+.toggle-wrap label::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:var(--dim);transition:transform .25s,background .25s}
+.toggle-wrap input:checked+label{background:var(--accent)}
+.toggle-wrap input:checked+label::after{transform:translateX(18px);background:#fff}
+
+/* Theme grid inside sub-panel */
+.theme-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.55rem;width:100%}
+.theme-card{border-radius:12px;border:2px solid var(--border);padding:.7rem;cursor:pointer;position:relative;transition:border-color .25s,transform .15s;overflow:hidden}
+.theme-card:hover:not(.locked){transform:scale(1.02);border-color:var(--accent)}
+.theme-card.active-theme{border-color:var(--accent)}
+.theme-card.locked{cursor:default;opacity:.6}
+.theme-preview{height:30px;border-radius:6px;margin-bottom:.4rem;display:flex;align-items:center;justify-content:center;gap:4px}
+.theme-dot{width:9px;height:9px;border-radius:50%}
+.theme-name{font-size:.62rem;font-weight:700;color:var(--text);display:block;letter-spacing:.1em}
+.theme-unlock{font-family:'Share Tech Mono',monospace;font-size:.47rem;color:var(--dim);letter-spacing:.05em;margin-top:2px;display:block}
+.theme-card.active-theme .theme-name{color:var(--accent)}
+
+/* Key map inside sub-panel */
+.key-map{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;width:100%;max-width:240px;align-self:center}
+.key-cell{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:.35rem;text-align:center}
+.key-cell.empty{background:transparent;border-color:transparent}
+.key-kbd{display:block;font-family:'Share Tech Mono',monospace;font-size:.7rem;font-weight:700;color:var(--text);letter-spacing:.05em}
+.key-pad-name{display:block;font-family:'Share Tech Mono',monospace;font-size:.44rem;color:var(--dim);letter-spacing:.06em;margin-top:2px}
+
+.danger-zone{width:100%;text-align:center;font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--dim);letter-spacing:.1em}
+.btn-danger{background:transparent;border:1px solid #7a1a1a;color:#d04040;font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.1em;padding:.4rem .95rem;border-radius:7px;cursor:pointer;transition:background .2s,color .2s;margin-top:.3rem}
+.btn-danger:hover{background:#7a1a1a;color:#ffaaaa}
 
 /* ── PWA Update Banner ── */
 #update-banner{
@@ -753,7 +992,78 @@ body.cb .pad.active .pad-icon{opacity:1}
 
 </div><!-- end onboarding -->
 
-<canvas id="fx-canvas"></canvas>
+<!-- ══ DRAWER BACKDROP ══ -->
+<div class="drawer-backdrop" id="drawer-backdrop" onclick="closeDrawer()"></div>
+
+<!-- ══ SLIDE-IN DRAWER ══ -->
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <span class="drawer-logo">NEURAL SYNC</span>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+
+  <!-- Player identity card -->
+  <div class="drawer-player-card">
+    <span class="drawer-callsign" id="drawer-callsign">—</span>
+    <div class="drawer-player-meta">
+      <div class="drawer-meta-item">STREAK <span id="drawer-streak">0</span>d</div>
+      <div class="drawer-meta-item">BEST <span id="drawer-best">0</span>pts</div>
+    </div>
+  </div>
+
+  <!-- Nav links -->
+  <div class="drawer-nav">
+    <button class="drawer-nav-item active-page" id="dnav-play" onclick="drawerNav('play')">
+      <span class="drawer-nav-icon">▶</span>
+      <div class="drawer-nav-texts">
+        <span class="drawer-nav-label">PLAY</span>
+        <span class="drawer-nav-sub">Start a new game</span>
+      </div>
+    </button>
+    <button class="drawer-nav-item" id="dnav-daily" onclick="drawerNav('daily')">
+      <span class="drawer-nav-icon">◈</span>
+      <div class="drawer-nav-texts">
+        <span class="drawer-nav-label">DAILY CHALLENGE</span>
+        <span class="drawer-nav-sub">One attempt per day</span>
+      </div>
+      <span class="drawer-nav-badge" id="drawer-daily-badge" style="display:none">TODAY</span>
+    </button>
+    <button class="drawer-nav-item" id="dnav-profile" onclick="drawerNav('profile')">
+      <span class="drawer-nav-icon">★</span>
+      <div class="drawer-nav-texts">
+        <span class="drawer-nav-label">PROFILE</span>
+        <span class="drawer-nav-sub">Stats &amp; Achievements</span>
+      </div>
+      <span class="drawer-nav-badge" id="drawer-ach-badge">0/16</span>
+    </button>
+
+    <div class="drawer-divider"></div>
+
+    <button class="drawer-nav-item" id="dnav-settings" onclick="drawerNav('settings')">
+      <span class="drawer-nav-icon">⚙</span>
+      <div class="drawer-nav-texts">
+        <span class="drawer-nav-label">SETTINGS</span>
+        <span class="drawer-nav-sub">Accessibility, themes &amp; more</span>
+      </div>
+    </button>
+    <button class="drawer-nav-item" onclick="openSubPanel('sp-identity');closeDrawer()">
+      <span class="drawer-nav-icon">👤</span>
+      <div class="drawer-nav-texts">
+        <span class="drawer-nav-label">IDENTITY</span>
+        <span class="drawer-nav-sub">Change your callsign</span>
+      </div>
+    </button>
+    <button class="drawer-nav-item" onclick="openSubPanel('sp-appearance');closeDrawer()">
+      <span class="drawer-nav-icon">🎨</span>
+      <div class="drawer-nav-texts">
+        <span class="drawer-nav-label">APPEARANCE</span>
+        <span class="drawer-nav-sub">Themes &amp; colours</span>
+      </div>
+    </button>
+  </div>
+
+  <div class="drawer-footer">NEURAL SYNC v8 · PWA</div>
+</div>
 
 <!-- ── PWA Update Banner ──────────────────────────────────
      Hidden by default. Slides up when a new version of the
@@ -766,9 +1076,22 @@ body.cb .pad.active .pad-icon{opacity:1}
   <button onclick="applyUpdate()">UPDATE</button>
 </div>
 <div class="ach-toast" id="ach-toast">UNLOCKED — <span class="tn" id="ach-toast-name"></span></div>
-<button class="mute-btn" id="mute-btn" onclick="toggleMute()">🔊</button>
+
+<canvas id="fx-canvas"></canvas>
 
 <div class="app">
+
+<!-- ══ TOP HEADER ══ -->
+<div class="top-header" id="top-header">
+  <button class="header-burger" onclick="openDrawer()" aria-label="Menu">
+    <div class="burger-line"></div>
+    <div class="burger-line"></div>
+    <div class="burger-line"></div>
+  </button>
+  <div class="header-title" id="header-title">NEURAL SYNC</div>
+  <button class="header-mute" id="mute-btn" onclick="toggleMute()" aria-label="Toggle sound">🔊</button>
+</div>
+
 <div class="page-area">
 
   <!-- ══════════════ PAGE: PLAY ══════════════ -->
@@ -901,69 +1224,179 @@ body.cb .pad.active .pad-icon{opacity:1}
   <div class="page" id="page-settings">
     <header>
       <div class="game-title" style="font-size:1.5rem">Settings</div>
-      <div class="game-subtitle">ACCESSIBILITY &amp; PERSONALISATION</div>
+      <div class="game-subtitle">TAP A CATEGORY TO CONFIGURE</div>
     </header>
 
-    <span class="section-label">ACCESSIBILITY</span>
-    <div class="settings-section">
-      <div class="settings-row">
-        <div class="settings-row-info">
-          <span class="settings-row-title">Replay intro</span>
-          <span class="settings-row-desc">Re-run the full onboarding flow — change your callsign, mode preference, and take the pad test again.</span>
-        </div>
-        <button class="ob-btn" style="width:auto;padding:.4rem .9rem;font-size:.6rem" onclick="OB.replayIntro()">REPLAY</button>
-      </div>
-    </div>
-    <div class="settings-section">
-      <div class="settings-row">
-        <div class="settings-row-info">
-          <span class="settings-row-title">Colorblind mode</span>
-          <span class="settings-row-desc">Wong (2011) palette: blue · orange · teal · pink. Shapes also enlarge.</span>
-        </div>
-        <div class="toggle-wrap"><input type="checkbox" id="toggle-cb" onchange="setColorblind(this.checked)"><label for="toggle-cb"></label></div>
-      </div>
-      <div class="settings-row">
-        <div class="settings-row-info">
-          <span class="settings-row-title">Haptic feedback</span>
-          <span class="settings-row-desc">Vibrates on press, error, and new record. Mobile only.</span>
-        </div>
-        <div class="toggle-wrap"><input type="checkbox" id="toggle-haptics" checked onchange="setHaptics(this.checked)"><label for="toggle-haptics"></label></div>
-      </div>
-      <div class="settings-row">
-        <div class="settings-row-info">
-          <span class="settings-row-title">Adaptive AI difficulty</span>
-          <span class="settings-row-desc">Tracks your accuracy and nudges flash speed to keep you in the "flow zone" (~70% success rate). Classic &amp; Reverse only.</span>
-        </div>
-        <div class="toggle-wrap"><input type="checkbox" id="toggle-ai" checked onchange="setAdaptiveAI(this.checked)"><label for="toggle-ai"></label></div>
-      </div>
-    </div>
+    <div class="settings-menu">
 
-    <span class="section-label">KEYBOARD CONTROLS</span>
-    <div class="settings-section">
-      <div class="settings-row">
-        <div class="settings-row-info">
-          <span class="settings-row-title">Show key hints on pads</span>
-          <span class="settings-row-desc">Displays the bound key in the corner of each pad.</span>
+      <button class="settings-card" onclick="openSubPanel('sp-identity')">
+        <div class="sc-icon">👤</div>
+        <div class="sc-texts">
+          <span class="sc-title">Identity</span>
+          <span class="sc-desc">Change your callsign and re-run the welcome intro</span>
         </div>
-        <div class="toggle-wrap"><input type="checkbox" id="toggle-keyhints" onchange="setKeyHints(this.checked)"><label for="toggle-keyhints"></label></div>
+        <span class="sc-arrow">›</span>
+      </button>
+
+      <button class="settings-card" onclick="openSubPanel('sp-accessibility')">
+        <div class="sc-icon">♿</div>
+        <div class="sc-texts">
+          <span class="sc-title">Accessibility</span>
+          <span class="sc-desc">Colorblind mode · Haptic feedback</span>
+        </div>
+        <span class="sc-arrow">›</span>
+      </button>
+
+      <button class="settings-card" onclick="openSubPanel('sp-gameoptions')">
+        <div class="sc-icon">🎮</div>
+        <div class="sc-texts">
+          <span class="sc-title">Game Options</span>
+          <span class="sc-desc">Adaptive AI difficulty · Keyboard controls</span>
+        </div>
+        <span class="sc-arrow">›</span>
+      </button>
+
+      <button class="settings-card" onclick="openSubPanel('sp-appearance')">
+        <div class="sc-icon">🎨</div>
+        <div class="sc-texts">
+          <span class="sc-title">Appearance</span>
+          <span class="sc-desc">Unlock and apply visual themes</span>
+        </div>
+        <span class="sc-arrow">›</span>
+      </button>
+
+      <button class="settings-card" onclick="openSubPanel('sp-data')" style="border-color:#3a1a1a">
+        <div class="sc-icon" style="color:#d04040">⚠</div>
+        <div class="sc-texts">
+          <span class="sc-title" style="color:#d04040">Data &amp; Reset</span>
+          <span class="sc-desc">Clear all saved progress and start fresh</span>
+        </div>
+        <span class="sc-arrow" style="color:#d04040">›</span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ══ SUB-PANEL: IDENTITY ══ -->
+  <div class="sub-panel" id="sp-identity">
+    <div class="sub-panel-header">
+      <button class="sp-back" onclick="closeSubPanel('sp-identity')">‹</button>
+      <span class="sub-panel-title">👤 IDENTITY</span>
+    </div>
+    <div class="sub-panel-body">
+      <div class="settings-section">
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:.6rem">
+          <div class="settings-row-info">
+            <span class="settings-row-title">Your Callsign</span>
+            <span class="settings-row-desc">This name appears throughout the game</span>
+          </div>
+          <input class="ob-name-input" id="sp-name-input" type="text" maxlength="12"
+                 placeholder="ENTER NAME" autocomplete="off" spellcheck="false"
+                 style="width:100%;font-size:1rem"
+                 oninput="this.value=this.value.toUpperCase()"/>
+          <button class="settings-row-action" onclick="spSaveCallsign()">SAVE CALLSIGN</button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <span class="settings-row-title">Replay Intro</span>
+            <span class="settings-row-desc">Re-run the full onboarding — mode selection and pad test</span>
+          </div>
+          <button class="settings-row-action" onclick="OB.replayIntro()">REPLAY</button>
+        </div>
       </div>
     </div>
-    <!-- Key map visual -->
-    <div class="key-map">
-      <div class="key-cell"><span class="key-kbd">W / ↑</span><span class="key-pad-name">RED</span></div>
-      <div class="key-cell empty"></div>
-      <div class="key-cell"><span class="key-kbd">E / →</span><span class="key-pad-name">BLUE</span></div>
-      <div class="key-cell"><span class="key-kbd">A / ←</span><span class="key-pad-name">GREEN</span></div>
-      <div class="key-cell" style="background:var(--white-d);border-color:var(--white-dp)"><span class="key-kbd" style="color:var(--white)">SPC</span><span class="key-pad-name">WHITE</span></div>
-      <div class="key-cell"><span class="key-kbd">S / ↓</span><span class="key-pad-name">YELLOW</span></div>
+  </div>
+
+  <!-- ══ SUB-PANEL: ACCESSIBILITY ══ -->
+  <div class="sub-panel" id="sp-accessibility">
+    <div class="sub-panel-header">
+      <button class="sp-back" onclick="closeSubPanel('sp-accessibility')">‹</button>
+      <span class="sub-panel-title">♿ ACCESSIBILITY</span>
     </div>
+    <div class="sub-panel-body">
+      <div class="settings-section">
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <span class="settings-row-title">Colorblind mode</span>
+            <span class="settings-row-desc">Wong (2011) palette: blue · orange · teal · pink. Shapes also enlarge for extra clarity.</span>
+          </div>
+          <div class="toggle-wrap"><input type="checkbox" id="toggle-cb" onchange="setColorblind(this.checked)"><label for="toggle-cb"></label></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <span class="settings-row-title">Haptic feedback</span>
+            <span class="settings-row-desc">Short vibration on correct press, longer buzz on wrong. Works on Android — silently ignored on iPhone.</span>
+          </div>
+          <div class="toggle-wrap"><input type="checkbox" id="toggle-haptics" checked onchange="setHaptics(this.checked)"><label for="toggle-haptics"></label></div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    <span class="section-label">THEME</span>
-    <div class="theme-grid" id="theme-grid"></div>
+  <!-- ══ SUB-PANEL: GAME OPTIONS ══ -->
+  <div class="sub-panel" id="sp-gameoptions">
+    <div class="sub-panel-header">
+      <button class="sp-back" onclick="closeSubPanel('sp-gameoptions')">‹</button>
+      <span class="sub-panel-title">🎮 GAME OPTIONS</span>
+    </div>
+    <div class="sub-panel-body">
+      <div class="settings-section">
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <span class="settings-row-title">Adaptive AI difficulty</span>
+            <span class="settings-row-desc">Watches your last 8 rounds and nudges the flash speed to keep your success rate near 70% — the psychological "flow zone". Classic and Reverse only.</span>
+          </div>
+          <div class="toggle-wrap"><input type="checkbox" id="toggle-ai" checked onchange="setAdaptiveAI(this.checked)"><label for="toggle-ai"></label></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-info">
+            <span class="settings-row-title">Show keyboard hints on pads</span>
+            <span class="settings-row-desc">Displays the bound key (W / E / A / S / Space) in the corner of each pad. Desktop only.</span>
+          </div>
+          <div class="toggle-wrap"><input type="checkbox" id="toggle-keyhints" onchange="setKeyHints(this.checked)"><label for="toggle-keyhints"></label></div>
+        </div>
+      </div>
+      <span class="section-label">KEYBOARD MAP</span>
+      <div class="key-map">
+        <div class="key-cell"><span class="key-kbd">W / ↑</span><span class="key-pad-name">RED</span></div>
+        <div class="key-cell empty"></div>
+        <div class="key-cell"><span class="key-kbd">E / →</span><span class="key-pad-name">BLUE</span></div>
+        <div class="key-cell"><span class="key-kbd">A / ←</span><span class="key-pad-name">GREEN</span></div>
+        <div class="key-cell" style="background:var(--white-d);border-color:var(--white-dp)"><span class="key-kbd" style="color:var(--white)">SPC</span><span class="key-pad-name">WHITE</span></div>
+        <div class="key-cell"><span class="key-kbd">S / ↓</span><span class="key-pad-name">YELLOW</span></div>
+      </div>
+    </div>
+  </div>
 
-    <div class="danger-zone">
-      <div>DANGER ZONE</div>
-      <button class="btn-danger" onclick="resetAllData()">✕ RESET ALL DATA</button>
+  <!-- ══ SUB-PANEL: APPEARANCE ══ -->
+  <div class="sub-panel" id="sp-appearance">
+    <div class="sub-panel-header">
+      <button class="sp-back" onclick="closeSubPanel('sp-appearance')">‹</button>
+      <span class="sub-panel-title">🎨 APPEARANCE</span>
+    </div>
+    <div class="sub-panel-body">
+      <div class="theme-grid" id="theme-grid"></div>
+    </div>
+  </div>
+
+  <!-- ══ SUB-PANEL: DATA ══ -->
+  <div class="sub-panel" id="sp-data">
+    <div class="sub-panel-header">
+      <button class="sp-back" onclick="closeSubPanel('sp-data')">‹</button>
+      <span class="sub-panel-title">⚠ DATA &amp; RESET</span>
+    </div>
+    <div class="sub-panel-body">
+      <div class="settings-section">
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:.5rem">
+          <div class="settings-row-info">
+            <span class="settings-row-title" style="color:#d04040">Reset all data</span>
+            <span class="settings-row-desc">Permanently deletes your callsign, all scores, achievements, daily streak, and saved themes. This cannot be undone.</span>
+          </div>
+          <button class="btn-danger" onclick="resetAllData()">✕ RESET EVERYTHING</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -981,14 +1414,90 @@ body.cb .pad.active .pad-icon{opacity:1}
 /* ══════════════════════════════════════════════
    PAGE NAVIGATION
 ══════════════════════════════════════════════ */
+const PAGE_TITLES = {
+  play:'NEURAL SYNC', daily:'DAILY CHALLENGE',
+  profile:'PROFILE', settings:'SETTINGS'
+};
+
 function showPage(n){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+n).classList.add('active');
   document.getElementById('nav-'+n).classList.add('active');
+  // Update header title
+  document.getElementById('header-title').textContent = PAGE_TITLES[n]||'NEURAL SYNC';
+  // Update drawer active state
+  document.querySelectorAll('.drawer-nav-item[id^="dnav-"]').forEach(b=>b.classList.remove('active-page'));
+  const dn=document.getElementById('dnav-'+n);
+  if(dn)dn.classList.add('active-page');
   if(n==='daily')    renderDailyPage();
   if(n==='profile')  renderProfilePage();
   if(n==='settings') renderSettingsPage();
+}
+
+/* ══════════════════════════════════════════════
+   DRAWER
+══════════════════════════════════════════════ */
+function openDrawer(){
+  // Refresh drawer data
+  const cs=OB.getCallsign()||'—';
+  document.getElementById('drawer-callsign').textContent=cs;
+  document.getElementById('drawer-streak').textContent=st.loadStreak().count||0;
+  document.getElementById('drawer-best').textContent=st.loadHS()||0;
+  // Achievement count badge
+  document.getElementById('drawer-ach-badge').textContent=
+    `${st.loadAch().length}/16`;
+  // Daily badge
+  const dailyBadge=document.getElementById('drawer-daily-badge');
+  if(!hasDailyDone()){dailyBadge.style.display='';dailyBadge.textContent='PLAY';}
+  else dailyBadge.style.display='none';
+
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawer-backdrop').classList.add('open');
+}
+
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawer-backdrop').classList.remove('open');
+}
+
+function drawerNav(page){
+  closeDrawer();
+  showPage(page);
+}
+
+/* ══════════════════════════════════════════════
+   SUB-PANELS
+══════════════════════════════════════════════ */
+function openSubPanel(id){
+  // Pre-fill callsign input if opening identity panel
+  if(id==='sp-identity'){
+    const inp=document.getElementById('sp-name-input');
+    if(inp) inp.value=OB.getCallsign()||'';
+  }
+  // Refresh theme grid if opening appearance panel
+  if(id==='sp-appearance') renderSettingsPage();
+  document.getElementById(id).classList.add('sp-open');
+}
+
+function closeSubPanel(id){
+  document.getElementById(id).classList.remove('sp-open');
+}
+
+function spSaveCallsign(){
+  const inp=document.getElementById('sp-name-input');
+  const val=(inp.value||'').trim().toUpperCase();
+  if(val.length<2){
+    inp.style.borderColor='var(--red)';
+    setTimeout(()=>inp.style.borderColor='',1400);
+    return;
+  }
+  OB.saveCallsign(val);
+  refreshCallsignUI(val);
+  closeSubPanel('sp-identity');
+  // Brief success feedback
+  setStatus('✓ Callsign updated','success');
+  setTimeout(()=>setStatus('Choose mode & difficulty, then START'),2000);
 }
 
 /* ══════════════════════════════════════════════
@@ -1606,20 +2115,26 @@ function renderScoreChart(history){
    SETTINGS PAGE RENDER
 ══════════════════════════════════════════════ */
 function renderSettingsPage(){
-  const grid=document.getElementById('theme-grid');grid.innerHTML='';
-  Object.entries(THEMES).forEach(([id,t])=>{
-    const unlocked=isThemeUnlocked(id),isActive=currentTheme===id;
-    const card=document.createElement('div');
-    card.className='theme-card'+(isActive?' active-theme':'')+(unlocked?'':' locked');
-    if(unlocked)card.onclick=()=>applyTheme(id);
-    const prev=t.preview.map(c=>`<div class="theme-dot" style="background:${c}"></div>`).join('');
-    card.innerHTML=`<div class="theme-preview" style="background:${t.previewBg}">${prev}</div><span class="theme-name">${t.name}${isActive?' ✓':''}</span><span class="theme-unlock">${unlocked?(isActive?'ACTIVE':'Tap to apply'):'🔒 '+t.unlockDesc}</span>`;
-    grid.appendChild(card);
+  // Build theme grid (in both settings page sub-panel and appearance sub-panel)
+  ['theme-grid'].forEach(id=>{
+    const grid=document.getElementById(id);
+    if(!grid)return;
+    grid.innerHTML='';
+    Object.entries(THEMES).forEach(([tid,t])=>{
+      const unlocked=isThemeUnlocked(tid),isActive=currentTheme===tid;
+      const card=document.createElement('div');
+      card.className='theme-card'+(isActive?' active-theme':'')+(unlocked?'':' locked');
+      if(unlocked)card.onclick=()=>applyTheme(tid);
+      const prev=t.preview.map(c=>`<div class="theme-dot" style="background:${c}"></div>`).join('');
+      card.innerHTML=`<div class="theme-preview" style="background:${t.previewBg}">${prev}</div><span class="theme-name">${t.name}${isActive?' ✓':''}</span><span class="theme-unlock">${unlocked?(isActive?'ACTIVE':'Tap to apply'):'🔒 '+t.unlockDesc}</span>`;
+      grid.appendChild(card);
+    });
   });
-  document.getElementById('toggle-cb').checked=document.body.classList.contains('cb');
-  document.getElementById('toggle-haptics').checked=hapticsOn;
-  document.getElementById('toggle-ai').checked=AI.on;
-  document.getElementById('toggle-keyhints').checked=keyHintsOn;
+  // Sync toggle states
+  const tcb=document.getElementById('toggle-cb');     if(tcb)tcb.checked=document.body.classList.contains('cb');
+  const th=document.getElementById('toggle-haptics'); if(th)th.checked=hapticsOn;
+  const tai=document.getElementById('toggle-ai');     if(tai)tai.checked=AI.on;
+  const tkh=document.getElementById('toggle-keyhints');if(tkh)tkh.checked=keyHintsOn;
 }
 
 /* ══════════════════════════════════════════════
@@ -1677,7 +2192,7 @@ const OB = {
   init(){
     const el=document.getElementById('onboarding');
     el.style.display='flex';
-    document.getElementById('mute-btn').style.display='none';
+    document.getElementById('top-header').style.display='none';
     this.showStage('ob-splash');
     this.startSplash(()=>{
       if(this.isNew()) this.showStage('ob-callsign');
@@ -1690,7 +2205,7 @@ const OB = {
     const el=document.getElementById('onboarding');
     el.style.display='flex';
     el.classList.remove('ob-exit');
-    document.getElementById('mute-btn').style.display='none';
+    document.getElementById('top-header').style.display='none';
     this.showStage('ob-splash');
     this.startSplash(()=> this.showStage('ob-callsign'));
   },
@@ -1714,7 +2229,7 @@ const OB = {
     setTimeout(()=>{
       el.style.display='none';
       el.classList.remove('ob-exit');
-      document.getElementById('mute-btn').style.display='';
+      document.getElementById('top-header').style.display='';
       updateExpertLock();
     }, 600);
   },
