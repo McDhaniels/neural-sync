@@ -20,8 +20,7 @@
   ╚══════════════════════════════════════════════════════════════╝
 */
 
-const CACHE_NAME = 'neural-sync-v2';
-
+const CACHE_NAME = 'neural-sync-v3';
 const CORE_FILES = [
   './',
   './index.html',
