@@ -1598,7 +1598,8 @@ function tone(freq,dur=.2,type='sine',vol=.38){
   const c=getCtx(),o=c.createOscillator(),g=c.createGain();
   o.connect(g);g.connect(c.destination);o.type=type;
   o.frequency.setValueAtTime(freq,c.currentTime);
-  g.gain.setValueAtTime(vol,c.currentTime);
+  const scaledVol = vol * (masterVol / 100);
+  g.gain.setValueAtTime(scaledVol,c.currentTime);
   g.gain.exponentialRampToValueAtTime(.001,c.currentTime+dur);
   o.start(c.currentTime);o.stop(c.currentTime+dur);
 }
@@ -2837,12 +2838,6 @@ function setVolume(val){
     bgMasterGain.gain.cancelScheduledValues(ctx.currentTime);
     bgMasterGain.gain.linearRampToValueAtTime(isMuted ? 0 : scaled, ctx.currentTime + 0.2);
   }
-}
-
-// Patch tone() to respect masterVol
-const _origTone = tone;
-function tone(freq, dur=.2, type='sine', vol=.38){
-  _origTone(freq, dur, type, vol * (masterVol / 100));
 }
 
 /* ════════════════════════════════════════════════════
