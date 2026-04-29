@@ -832,6 +832,37 @@ body.cb .pad.active .pad-icon{opacity:1}
 .toggle-wrap input:checked+label{background:var(--accent)}
 .toggle-wrap input:checked+label::after{transform:translateX(18px);background:#fff}
 .theme-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.55rem;width:100%}
+
+/* Volume slider */
+.vol-row{display:flex;align-items:center;gap:.7rem;width:100%}
+.vol-slider{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:2px;background:var(--border);outline:none;cursor:pointer}
+.vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--accent);cursor:pointer;box-shadow:0 0 0 3px rgba(184,184,255,.18)}
+.vol-slider::-moz-range-thumb{width:18px;height:18px;border:none;border-radius:50%;background:var(--accent);cursor:pointer}
+.vol-pct{font-family:'Orbitron',monospace;font-size:.65rem;font-weight:700;color:var(--accent);min-width:2.6rem;text-align:right}
+
+/* Save/restore code UI */
+.save-code-box{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:.75rem;display:flex;flex-direction:column;gap:.6rem}
+.save-code-display{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:900;letter-spacing:.2em;color:var(--yellow);text-align:center;word-break:break-all;min-height:2rem;line-height:1.5}
+.save-code-actions{display:flex;gap:.5rem}
+.save-code-actions button{flex:1}
+.code-input{width:100%;background:var(--bg);border:1.5px solid var(--border);color:var(--text);font-family:'Orbitron',monospace;font-size:.8rem;letter-spacing:.15em;text-align:center;padding:.5rem;border-radius:8px;outline:none;text-transform:uppercase;transition:border-color .2s}
+.code-input:focus{border-color:var(--accent)}
+.code-feedback{font-family:'Share Tech Mono',monospace;font-size:.55rem;min-height:.9rem;letter-spacing:.1em;text-align:center}
+.code-feedback.ok{color:var(--green)}.code-feedback.err{color:var(--red)}
+
+/* In-app review prompt */
+.review-prompt{position:fixed;inset:0;z-index:150;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:1.5rem;opacity:0;pointer-events:none;transition:opacity .35s}
+.review-prompt.show{opacity:1;pointer-events:all}
+.review-card{background:var(--surface);border:1px solid var(--accent);border-radius:18px;padding:1.6rem 1.4rem;width:100%;max-width:360px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:.85rem}
+.review-stars{font-size:2rem;letter-spacing:.1em}
+.review-title{font-size:.95rem;font-weight:900;letter-spacing:.15em;color:var(--accent)}
+.review-body{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--dim);letter-spacing:.07em;line-height:1.6}
+.review-actions{display:flex;gap:.6rem;width:100%}
+.review-actions button{flex:1}
+
+/* Offline-ready confirmation toast */
+.offline-toast{position:fixed;bottom:calc(var(--nav-h) + 4.5rem);left:50%;transform:translateX(-50%) translateY(20px);background:var(--surface);border:1px solid var(--green);border-radius:9px;padding:.45rem 1rem;font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--green);letter-spacing:.08em;white-space:nowrap;z-index:120;opacity:0;transition:opacity .4s,transform .4s;pointer-events:none}
+.offline-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .theme-card{border-radius:12px;border:2px solid var(--border);padding:.7rem;cursor:pointer;position:relative;transition:border-color .25s,transform .15s;overflow:hidden}
 .theme-card:hover:not(.locked){transform:scale(1.02);border-color:var(--accent)}
 .theme-card.active-theme{border-color:var(--accent)}
@@ -991,6 +1022,26 @@ body.cb .pad.active .pad-icon{opacity:1}
   </div>
 
 </div><!-- end onboarding -->
+
+<!-- ══ IN-APP REVIEW PROMPT ══ -->
+<div class="review-prompt" id="review-prompt">
+  <div class="review-card">
+    <div class="review-stars">⭐⭐⭐⭐⭐</div>
+    <div class="review-title">ENJOYING NEURAL SYNC?</div>
+    <div class="review-body" id="review-body">
+      You've hit a <span id="review-streak-num">7</span>-day streak!<br>
+      A quick review helps other players find the game<br>and takes less than 30 seconds.
+    </div>
+    <div class="review-actions">
+      <button class="ob-btn" style="font-size:.68rem;padding:.6rem" onclick="openReviewLink()">⭐ RATE NOW</button>
+      <button class="ob-btn" style="font-size:.68rem;padding:.6rem;border-color:var(--border);color:var(--dim)" onclick="dismissReview(false)">LATER</button>
+    </div>
+    <button class="ob-btn-ghost" onclick="dismissReview(true)">Don't ask again</button>
+  </div>
+</div>
+
+<!-- ══ OFFLINE READY TOAST ══ -->
+<div class="offline-toast" id="offline-toast">✓ Neural Sync is installed — works offline anytime</div>
 
 <!-- ══ DRAWER BACKDROP ══ -->
 <div class="drawer-backdrop" id="drawer-backdrop" onclick="closeDrawer()"></div>
@@ -1306,6 +1357,29 @@ body.cb .pad.active .pad-icon{opacity:1}
           <button class="settings-row-action" onclick="OB.replayIntro()">REPLAY</button>
         </div>
       </div>
+
+      <!-- SAVE / RESTORE CODE -->
+      <div style="font-family:'Share Tech Mono',monospace;font-size:.53rem;letter-spacing:.18em;color:var(--dim);align-self:flex-start;margin-top:.2rem">BACKUP &amp; RESTORE</div>
+      <div class="save-code-box">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--dim);letter-spacing:.06em;line-height:1.5">
+          Your save code backs up all progress — scores, streak, achievements, callsign.
+          Copy it somewhere safe before clearing your browser or changing devices.
+        </div>
+        <div class="save-code-display" id="save-code-display">TAP GENERATE</div>
+        <div class="save-code-actions">
+          <button class="settings-row-action" onclick="generateSaveCode()">GENERATE</button>
+          <button class="settings-row-action" onclick="copySaveCode()">COPY</button>
+        </div>
+      </div>
+      <div class="save-code-box">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--dim);letter-spacing:.06em">Restore from a save code:</div>
+        <input class="code-input" id="restore-input" type="text" maxlength="64"
+               placeholder="PASTE CODE HERE" autocomplete="off" spellcheck="false"/>
+        <div class="save-code-actions">
+          <button class="settings-row-action" onclick="restoreSaveCode()">RESTORE PROGRESS</button>
+        </div>
+        <div class="code-feedback" id="restore-feedback"></div>
+      </div>
     </div>
   </div>
 
@@ -1317,6 +1391,19 @@ body.cb .pad.active .pad-icon{opacity:1}
     </div>
     <div class="sub-panel-body">
       <div class="settings-section">
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:.55rem">
+          <div class="settings-row-info">
+            <span class="settings-row-title">Music &amp; Sound Volume</span>
+            <span class="settings-row-desc">Controls the overall game volume including background music and pad sounds</span>
+          </div>
+          <div class="vol-row">
+            <span style="font-size:.8rem">🔇</span>
+            <input class="vol-slider" type="range" id="vol-slider" min="0" max="100" value="85"
+                   oninput="setVolume(this.value)"/>
+            <span class="vol-pct" id="vol-pct">85%</span>
+            <span style="font-size:.8rem">🔊</span>
+          </div>
+        </div>
         <div class="settings-row">
           <div class="settings-row-info">
             <span class="settings-row-title">Colorblind mode</span>
@@ -1616,7 +1703,10 @@ function todayStr(){const d=new Date();return`${d.getFullYear()}${String(d.getMo
 function dailyKey(){return`ns7_daily_${todayStr()}`;}
 function hasDailyDone(){return localStorage.getItem(dailyKey())!==null;}
 function saveDailyRes(sc,lv){localStorage.setItem(dailyKey(),JSON.stringify({score:sc,level:lv}));}
-function bumpStreak(){const tod=todayStr(),sd=st.loadStreak();if(sd.last===tod)return;const yd=new Date();yd.setDate(yd.getDate()-1);const yStr=`${yd.getFullYear()}${String(yd.getMonth()+1).padStart(2,'0')}${String(yd.getDate()).padStart(2,'0')}`;sd.count=localStorage.getItem(`ns7_daily_${yStr}`)!==null?sd.count+1:1;sd.last=tod;st.saveStreak(sd);refreshStreakDisplay(sd.count);}
+function bumpStreak(){const tod=todayStr(),sd=st.loadStreak();if(sd.last===tod)return;const yd=new Date();yd.setDate(yd.getDate()-1);const yStr=`${yd.getFullYear()}${String(yd.getMonth()+1).padStart(2,'0')}${String(yd.getDate()).padStart(2,'0')}`;sd.count=localStorage.getItem(`ns7_daily_${yStr}`)!==null?sd.count+1:1;sd.last=tod;st.saveStreak(sd);refreshStreakDisplay(sd.count);
+  // Trigger review prompt at 7-day streak milestones
+  if(sd.count>0 && sd.count%7===0) setTimeout(()=>showReviewPrompt('streak',sd.count),2000);
+}
 function refreshStreakDisplay(n){document.getElementById('streak-val').textContent=n>0?n:'—';document.getElementById('streak-box').classList.toggle('streak-on',n>0);document.getElementById('daily-streak-num').textContent=n;}
 function trackGameEnd(sc,lv,cor,mode){const s=st.loadStats();s.games++;s.correct+=cor;if(sc>s.bestScore)s.bestScore=sc;if(lv>s.bestLevel)s.bestLevel=lv;st.saveStats(s);const h=st.loadHist();h.push({score:sc,level:lv,mode,date:todayStr()});if(h.length>20)h.splice(0,h.length-20);st.saveHist(h);}
 function makeLCG(seed){let s=seed>>>0;return()=>{s=(Math.imul(1664525,s)+1013904223)>>>0;return s/0xFFFFFFFF;};}
@@ -2440,21 +2530,20 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js', { scope: './' })
     .then(reg => {
       console.log('[Neural Sync] SW registered, scope:', reg.scope);
-
-      // Listen for a new SW waiting — means an update was downloaded
       reg.addEventListener('updatefound', () => {
         const newSW = reg.installing;
         newSW.addEventListener('statechange', () => {
           if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-            // New version ready — show the update banner
             document.getElementById('update-banner').classList.add('show');
+          }
+          // First-ever install — show offline toast
+          if (newSW.state === 'activated' && !navigator.serviceWorker.controller) {
+            setTimeout(showOfflineToast, 2000);
           }
         });
       });
     })
     .catch(err => console.warn('[Neural Sync] SW registration failed:', err));
-
-  // When the controller changes (new SW activated), reload to use it
   navigator.serviceWorker.addEventListener('controllerchange', () => {
     window.location.reload();
   });
@@ -2462,12 +2551,22 @@ if ('serviceWorker' in navigator) {
 
 function applyUpdate() {
   navigator.serviceWorker.getRegistration().then(reg => {
-    if (reg?.waiting) {
-      reg.waiting.postMessage({ action: 'skipWaiting' });
-    }
+    if (reg?.waiting) reg.waiting.postMessage({ action: 'skipWaiting' });
   });
   document.getElementById('update-banner').classList.remove('show');
 }
+
+// Restore saved volume
+(()=>{
+  const savedVol = localStorage.getItem('ns7_vol');
+  if(savedVol !== null){
+    masterVol = Number(savedVol);
+    const sl = document.getElementById('vol-slider');
+    const pt = document.getElementById('vol-pct');
+    if(sl) sl.value = masterVol;
+    if(pt) pt.textContent = masterVol + '%';
+  }
+})();
 
 /* ══════════════════════════════════════════════
    HELPERS
@@ -2644,10 +2743,13 @@ async function gameOver(reason='miss'){
     hsBox.classList.add('new-record');
     hsSaved.innerHTML=`★ NEW RECORD: <span>${highScore} pts</span>`;
     confetti();playNewRecord();vibe([100,50,100,50,300]);
-    setStatus(`★ NEW RECORD — Level ${level}!`,'record');
+    setStatus(`★ INCREDIBLE${getCallsignGreeting()}! New record — Level ${level}!`,'record');
+    // Show review prompt on first personal best (delayed so they enjoy the moment first)
+    setTimeout(()=>showReviewPrompt('record'),3500);
   } else {
     hsSaved.innerHTML=highScore>0?`Best: <span>${highScore} pts</span>`:'';
-    setStatus(reason==='timeout'?`TIME UP — Score: ${score}`:`GAME OVER — Level ${level} · ${score} pts`,'error');
+    const cs=getCallsignGreeting();
+    setStatus(reason==='timeout'?`TIME UP${cs} — Score: ${score}`:`GAME OVER${cs} — Level ${level} · ${score} pts`,'error');
   }
 
   checkAch();updateExpertLock();
@@ -2712,9 +2814,173 @@ function renderProfilePage(){
 ══════════════════════════════════════════════ */
 function resetAllData(){
   if(!confirm('Reset ALL progress, scores, achievements, streaks, and callsign? This cannot be undone.'))return;
-  ['ns7_hs','ns7_streak','ns7_ach','ns7_stats','ns7_hist','ns7_theme','ns7_cb','ns7_haptics','ns7_ai','ns7_keyhints','ns7_callsign'].forEach(k=>localStorage.removeItem(k));
+  ['ns7_hs','ns7_streak','ns7_ach','ns7_stats','ns7_hist','ns7_theme','ns7_cb','ns7_haptics','ns7_ai','ns7_keyhints','ns7_callsign','ns7_vol','ns7_review_done','ns7_review_asked'].forEach(k=>localStorage.removeItem(k));
   Object.keys(localStorage).filter(k=>k.startsWith('ns7_daily_')).forEach(k=>localStorage.removeItem(k));
   location.reload();
+}
+
+/* ════════════════════════════════════════════════════
+   VOLUME CONTROL
+   Controls the bgMasterGain and scales all tone() calls.
+   vol is 0–100, stored as ns7_vol.
+════════════════════════════════════════════════════ */
+let masterVol = 85; // default 85%
+
+function setVolume(val){
+  masterVol = Number(val);
+  localStorage.setItem('ns7_vol', String(masterVol));
+  document.getElementById('vol-pct').textContent = masterVol + '%';
+  // Update bg music gain if running
+  if(bgMasterGain){
+    const ctx = getCtx();
+    const scaled = (masterVol / 100) * BG_VOL;
+    bgMasterGain.gain.cancelScheduledValues(ctx.currentTime);
+    bgMasterGain.gain.linearRampToValueAtTime(isMuted ? 0 : scaled, ctx.currentTime + 0.2);
+  }
+}
+
+// Patch tone() to respect masterVol
+const _origTone = tone;
+function tone(freq, dur=.2, type='sine', vol=.38){
+  _origTone(freq, dur, type, vol * (masterVol / 100));
+}
+
+/* ════════════════════════════════════════════════════
+   SAVE / RESTORE CODE SYSTEM
+   Encodes all progress as a compact base64 JSON string.
+   Format: base64(JSON({ v, cs, hs, str, ach, stats, hist }))
+   'v' = schema version so future changes can migrate safely.
+════════════════════════════════════════════════════ */
+function buildSavePayload(){
+  return {
+    v:    1,
+    cs:   OB.getCallsign(),
+    hs:   st.loadHS(),
+    str:  st.loadStreak(),
+    ach:  st.loadAch(),
+    stat: st.loadStats(),
+    hist: st.loadHist().slice(-10), // only last 10 to keep code short
+  };
+}
+
+function generateSaveCode(){
+  try{
+    const payload = JSON.stringify(buildSavePayload());
+    const code    = btoa(unescape(encodeURIComponent(payload)));
+    document.getElementById('save-code-display').textContent = code;
+    return code;
+  } catch(e){
+    document.getElementById('save-code-display').textContent = 'ERROR';
+    return null;
+  }
+}
+
+function copySaveCode(){
+  const code = generateSaveCode();
+  if(!code) return;
+  navigator.clipboard.writeText(code)
+    .then(()=>{
+      const el = document.getElementById('save-code-display');
+      const prev = el.textContent;
+      el.style.color = 'var(--green)';
+      el.textContent = 'COPIED!';
+      setTimeout(()=>{ el.textContent = prev; el.style.color = ''; }, 1800);
+    })
+    .catch(()=>{
+      // Fallback: select the text so user can copy manually
+      const el = document.getElementById('save-code-display');
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      window.getSelection().removeAllRanges();
+      window.getSelection().addRange(range);
+    });
+}
+
+function restoreSaveCode(){
+  const fb  = document.getElementById('restore-feedback');
+  const inp = document.getElementById('restore-input');
+  const raw = inp.value.trim();
+  if(!raw){ fb.className='code-feedback err'; fb.textContent='Paste a save code first'; return; }
+  try{
+    const decoded = JSON.parse(decodeURIComponent(escape(atob(raw))));
+    if(decoded.v !== 1) throw new Error('version mismatch');
+    // Restore everything
+    if(decoded.cs)   OB.saveCallsign(decoded.cs);
+    if(decoded.hs)   st.saveHS(decoded.hs);
+    if(decoded.str)  st.saveStreak(decoded.str);
+    if(decoded.ach)  st.saveAch(decoded.ach);
+    if(decoded.stat) st.saveStats(decoded.stat);
+    if(decoded.hist) st.saveHist(decoded.hist);
+    fb.className='code-feedback ok';
+    fb.textContent='✓ Progress restored! Reloading…';
+    setTimeout(()=> location.reload(), 1400);
+  } catch(e){
+    fb.className='code-feedback err';
+    fb.textContent='Invalid code — please check and try again';
+  }
+}
+
+/* ════════════════════════════════════════════════════
+   IN-APP REVIEW PROMPT
+   Shown once at 7-day streak, once at first personal best,
+   never more than once per 30 days, never after game over.
+   Uses the GitHub Pages URL as the review/share target.
+════════════════════════════════════════════════════ */
+const REVIEW_KEY_DONE   = 'ns7_review_done';   // user said "don't ask again"
+const REVIEW_KEY_ASKED  = 'ns7_review_asked';  // timestamp of last ask
+
+function shouldShowReview(){
+  if(localStorage.getItem(REVIEW_KEY_DONE)) return false;
+  const last = Number(localStorage.getItem(REVIEW_KEY_ASKED)||0);
+  return (Date.now() - last) > 30 * 24 * 60 * 60 * 1000; // 30 days
+}
+
+function showReviewPrompt(reason='streak', streakCount=7){
+  if(!shouldShowReview()) return;
+  document.getElementById('review-streak-num').textContent = streakCount;
+  const body = document.getElementById('review-body');
+  if(reason === 'record'){
+    body.innerHTML = `You just hit a personal best!<br>A quick review helps other players<br>discover Neural Sync — takes 30 seconds.`;
+  } else {
+    body.innerHTML = `You've hit a <span id="review-streak-num">${streakCount}</span>-day streak!<br>A quick review helps other players<br>find the game and takes less than 30 seconds.`;
+  }
+  document.getElementById('review-prompt').classList.add('show');
+  localStorage.setItem(REVIEW_KEY_ASKED, String(Date.now()));
+}
+
+function openReviewLink(){
+  // Replace with your actual GitHub Pages URL
+  const url = window.location.origin + window.location.pathname;
+  window.open(url, '_blank');
+  dismissReview(false);
+}
+
+function dismissReview(permanent){
+  document.getElementById('review-prompt').classList.remove('show');
+  if(permanent) localStorage.setItem(REVIEW_KEY_DONE, '1');
+}
+
+/* ════════════════════════════════════════════════════
+   OFFLINE READY TOAST
+   Shown once after the service worker first caches
+   the app successfully.
+════════════════════════════════════════════════════ */
+function showOfflineToast(){
+  if(localStorage.getItem('ns7_offline_shown')) return;
+  localStorage.setItem('ns7_offline_shown','1');
+  const t = document.getElementById('offline-toast');
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 4500);
+}
+
+/* ════════════════════════════════════════════════════
+   PERSONALISED CALLSIGN IN GAMEPLAY
+   Called from gameOver() and sequence-complete moments.
+   Uses the player's callsign in status messages.
+════════════════════════════════════════════════════ */
+function getCallsignGreeting(){
+  const cs = OB.getCallsign();
+  return cs ? `, ${cs}` : '';
 }
 </script>
 </html>
