@@ -81,6 +81,139 @@ body::before{content:"";position:fixed;inset:0;background-image:linear-gradient(
    BOTTOM NAV
 ══════════════════════════════════════════════ */
 .bottom-nav{width:100%;max-width:480px;height:var(--nav-h);flex-shrink:0;display:flex;background:var(--surface);border-top:1px solid var(--border)}
+
+/* ══════════════════════════════════════════════
+   LEADERBOARD PAGE
+══════════════════════════════════════════════ */
+
+/* Filter bar — mode + scope tabs */
+.lb-filter-bar{
+  display:flex;flex-direction:column;gap:.5rem;width:100%;
+}
+.lb-tabs{
+  display:flex;gap:4px;background:var(--surface);
+  border:1px solid var(--border);border-radius:10px;padding:4px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;
+}
+.lb-tab{
+  flex-shrink:0;font-family:'Share Tech Mono',monospace;font-size:.58rem;
+  letter-spacing:.08em;padding:.3rem .75rem;border-radius:7px;
+  cursor:pointer;color:var(--dim);border:none;background:none;
+  transition:background .18s,color .18s;white-space:nowrap;
+}
+.lb-tab.active{background:var(--accent);color:var(--bg);font-weight:700}
+.lb-tab:hover:not(.active){color:var(--text)}
+
+/* Difficulty pill row */
+.lb-diff-pills{display:flex;gap:.4rem}
+.lb-diff-pill{
+  font-family:'Share Tech Mono',monospace;font-size:.52rem;
+  letter-spacing:.08em;padding:.25rem .7rem;border-radius:20px;
+  cursor:pointer;border:1px solid var(--border);
+  color:var(--dim);background:none;
+  transition:border-color .18s,color .18s;white-space:nowrap;
+}
+.lb-diff-pill.active-easy  {border-color:var(--green); color:var(--green)}
+.lb-diff-pill.active-normal{border-color:var(--yellow);color:var(--yellow)}
+.lb-diff-pill.active-hard  {border-color:var(--red);   color:var(--red)}
+
+/* Scope toggle — Weekly / All-time */
+.lb-scope-row{display:flex;gap:.4rem;align-self:flex-end}
+.lb-scope-btn{
+  font-family:'Share Tech Mono',monospace;font-size:.52rem;
+  letter-spacing:.08em;padding:.25rem .8rem;border-radius:7px;
+  cursor:pointer;border:1px solid var(--border);
+  color:var(--dim);background:none;transition:all .18s;
+}
+.lb-scope-btn.active{background:var(--surface);border-color:var(--accent);color:var(--accent)}
+
+/* The leaderboard table area */
+.lb-wrap{width:100%;display:flex;flex-direction:column;gap:0}
+
+/* My rank sticky card */
+.lb-my-rank{
+  background:rgba(184,184,255,.07);border:1px solid var(--accent);
+  border-radius:10px;padding:.6rem .9rem;display:none;
+  flex-direction:row;align-items:center;gap:.7rem;
+  font-family:'Orbitron',monospace;
+}
+.lb-my-rank.show{display:flex}
+.lb-my-rank-pos{
+  font-size:1.3rem;font-weight:900;color:var(--accent);
+  min-width:2.2rem;text-align:center;
+}
+.lb-my-rank-info{flex:1}
+.lb-my-rank-name{font-size:.72rem;font-weight:700;color:var(--accent);display:block}
+.lb-my-rank-sub{
+  font-family:'Share Tech Mono',monospace;font-size:.5rem;
+  color:var(--dim);display:block;margin-top:1px;
+}
+.lb-my-rank-score{font-size:1.1rem;font-weight:900;color:var(--yellow)}
+
+/* Row styles */
+.lb-row{
+  display:flex;align-items:center;gap:.7rem;
+  padding:.65rem .5rem;
+  border-bottom:1px solid rgba(42,42,63,.6);
+  transition:background .15s;
+}
+.lb-row:hover{background:rgba(184,184,255,.03)}
+.lb-row:last-child{border-bottom:none}
+
+/* Rank position */
+.lb-pos{
+  font-family:'Orbitron',monospace;font-size:.8rem;font-weight:900;
+  min-width:2rem;text-align:center;color:var(--dim);
+}
+.lb-pos.gold  {color:#FFD700}
+.lb-pos.silver{color:#C0C0C0}
+.lb-pos.bronze{color:#CD7F32}
+
+/* Flag + name */
+.lb-flag{font-size:1rem;flex-shrink:0}
+.lb-info{flex:1;overflow:hidden}
+.lb-name{
+  font-family:'Orbitron',monospace;font-size:.68rem;font-weight:700;
+  color:var(--text);display:block;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.lb-meta{
+  font-family:'Share Tech Mono',monospace;font-size:.46rem;
+  color:var(--dim);display:block;margin-top:1px;letter-spacing:.05em;
+}
+.lb-score{
+  font-family:'Orbitron',monospace;font-size:.85rem;
+  font-weight:900;color:var(--yellow);
+  min-width:3rem;text-align:right;flex-shrink:0;
+}
+.lb-level{
+  font-family:'Share Tech Mono',monospace;font-size:.46rem;
+  color:var(--dim);display:block;text-align:right;margin-top:1px;
+}
+
+/* Empty / loading state */
+.lb-state{
+  text-align:center;padding:2rem 1rem;
+  font-family:'Share Tech Mono',monospace;font-size:.65rem;
+  color:var(--dim);letter-spacing:.1em;
+}
+.lb-state .lb-spinner{
+  display:block;font-size:1.4rem;margin-bottom:.6rem;
+  animation:spin .9s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Submit toast */
+.submit-toast{
+  position:fixed;bottom:calc(var(--nav-h) + 4.5rem);left:50%;
+  transform:translateX(-50%) translateY(20px);
+  background:var(--surface);border:1px solid var(--accent);
+  border-radius:9px;padding:.45rem 1rem;
+  font-family:'Share Tech Mono',monospace;font-size:.65rem;
+  color:var(--accent);letter-spacing:.08em;white-space:nowrap;
+  z-index:120;opacity:0;transition:opacity .4s,transform .4s;pointer-events:none;
+}
+.submit-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .header-burger{
   width:34px;height:34px;background:none;border:none;
   cursor:pointer;display:flex;flex-direction:column;
@@ -1661,11 +1794,63 @@ body.cb .pad.active .pad-icon{opacity:1}
     </div>
   </div>
 
+  <!-- ══════════════ PAGE: RANKS ══════════════ -->
+  <div class="page" id="page-ranks">
+
+    <header>
+      <div class="game-title" style="font-size:1.5rem">Rankings</div>
+      <div class="game-subtitle">GLOBAL LEADERBOARD</div>
+    </header>
+
+    <div class="lb-filter-bar">
+      <div class="lb-tabs" id="lb-mode-tabs">
+        <button class="lb-tab active" data-mode="all"     onclick="lbSetMode('all')"    >🌍 ALL-TIME</button>
+        <button class="lb-tab"        data-mode="classic" onclick="lbSetMode('classic')">▶ CLASSIC</button>
+        <button class="lb-tab"        data-mode="reverse" onclick="lbSetMode('reverse')">↩ REVERSE</button>
+        <button class="lb-tab"        data-mode="speed"   onclick="lbSetMode('speed')"  >⏱ SPEED</button>
+        <button class="lb-tab"        data-mode="duel"    onclick="lbSetMode('duel')"   >⚔ DUEL</button>
+        <button class="lb-tab"        data-mode="expert"  onclick="lbSetMode('expert')" >✦ EXPERT</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem">
+        <div class="lb-diff-pills" id="lb-diff-pills">
+          <button class="lb-diff-pill"              data-diff="easy"   onclick="lbSetDiff('easy')"  >EASY</button>
+          <button class="lb-diff-pill active-normal" data-diff="normal" onclick="lbSetDiff('normal')">NORMAL</button>
+          <button class="lb-diff-pill"              data-diff="hard"   onclick="lbSetDiff('hard')"  >HARD</button>
+        </div>
+        <div class="lb-scope-row">
+          <button class="lb-scope-btn active" data-scope="weekly"  onclick="lbSetScope('weekly')" >WEEKLY</button>
+          <button class="lb-scope-btn"         data-scope="alltime" onclick="lbSetScope('alltime')">ALL‑TIME</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="lb-my-rank" id="lb-my-rank">
+      <div class="lb-my-rank-pos" id="lb-my-pos">#—</div>
+      <div class="lb-my-rank-info">
+        <span class="lb-my-rank-name" id="lb-my-name">YOU</span>
+        <span class="lb-my-rank-sub"  id="lb-my-sub">Your best on this board</span>
+      </div>
+      <div>
+        <div class="lb-my-rank-score" id="lb-my-score">—</div>
+        <div class="lb-level"         id="lb-my-level">—</div>
+      </div>
+    </div>
+
+    <div class="lb-wrap" id="lb-wrap">
+      <div class="lb-state"><span class="lb-spinner">⟳</span>Tap a category to load</div>
+    </div>
+
+  </div><!-- end page-ranks -->
+
 </div><!-- page-area -->
+
+<!-- Submit score toast -->
+<div class="submit-toast" id="submit-toast"></div>
 
 <nav class="bottom-nav">
   <button class="nav-btn active" id="nav-lobby"    onclick="showPage('lobby')"   ><span class="nav-icon">▶</span><span>PLAY</span></button>
   <button class="nav-btn"        id="nav-daily"    onclick="showPage('daily')"   ><span class="nav-icon">◈</span><span>DAILY</span></button>
+  <button class="nav-btn"        id="nav-ranks"    onclick="showPage('ranks')"   ><span class="nav-icon">🏆</span><span>RANKS</span></button>
   <button class="nav-btn"        id="nav-profile"  onclick="showPage('profile')" ><span class="nav-icon">★</span><span>PROFILE</span></button>
   <button class="nav-btn"        id="nav-settings" onclick="showPage('settings')"><span class="nav-icon">⚙</span><span>SETTINGS</span></button>
 </nav>
@@ -1677,14 +1862,13 @@ body.cb .pad.active .pad-icon{opacity:1}
 ══════════════════════════════════════════════ */
 const PAGE_TITLES = {
   lobby:'SELECT MODE', play:'NEURAL SYNC', daily:'DAILY CHALLENGE',
-  profile:'PROFILE', settings:'SETTINGS'
+  ranks:'RANKINGS', profile:'PROFILE', settings:'SETTINGS'
 };
 
 function showPage(n){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+n).classList.add('active');
-  // Nav: lobby and play both light up the PLAY nav button
   const navId = (n==='play') ? 'nav-lobby' : 'nav-'+n;
   const navEl = document.getElementById(navId);
   if(navEl) navEl.classList.add('active');
@@ -1694,6 +1878,7 @@ function showPage(n){
   if(dn)dn.classList.add('active-page');
   if(n==='lobby')    renderLobbyPage();
   if(n==='daily')    renderDailyPage();
+  if(n==='ranks')    renderRanksPage();
   if(n==='profile')  renderProfilePage();
   if(n==='settings') renderSettingsPage();
 }
@@ -3285,6 +3470,281 @@ function showOfflineToast(){
 function getCallsignGreeting(){
   const cs = OB.getCallsign();
   return cs ? `, ${cs}` : '';
+}
+
+/* ════════════════════════════════════════════════════════════
+   LEADERBOARD ENGINE
+   ════════════════════════════════════════════════════════════
+   Supabase project: gcftzjriognjsujreodd
+   Table: leaderboard
+   Columns: id, callsign, score, level, mode, difficulty,
+            country, flag, created_at
+
+   Architecture:
+   • submitScore()    → called after every game, posts to Supabase
+   • fetchLeaderboard() → fetches top 100 for current filter
+   • renderRanksPage()  → builds the UI from fetched data
+   • Anti-cheat: Supabase RLS policy rejects impossible scores
+   • Country detection: Intl.DateTimeFormat locale → flag emoji
+════════════════════════════════════════════════════════════ */
+
+const SB_URL  = 'https://gcftzjriognjsujreodd.supabase.co';
+const SB_KEY  = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjZnR6anJpb2duanN1anJlb2RkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzc1NzI4NDQsImV4cCI6MjA5MzE0ODg0NH0.gkFt8jT357qNoEAVUALUjuLJBk2FHdLzrQdNAvOH2xI';
+
+/* ── Country flag detection ──────────────────────────────────
+   Uses the browser's locale to infer country.
+   Returns a flag emoji + country code, e.g. "🇬🇭 GH"
+   Falls back to "🌍 ??" if locale can't be determined.
+─────────────────────────────────────────────────────────── */
+function getCountryInfo(){
+  try{
+    const loc  = Intl.DateTimeFormat().resolvedOptions().locale || '';
+    const code = loc.split('-').pop().toUpperCase();
+    if(code.length !== 2) return {country:'??', flag:'🌍'};
+    // Convert country code to flag emoji (each letter → regional indicator symbol)
+    const flag = [...code].map(c =>
+      String.fromCodePoint(c.charCodeAt(0) - 65 + 0x1F1E6)
+    ).join('');
+    return {country: code, flag};
+  } catch(_){
+    return {country:'??', flag:'🌍'};
+  }
+}
+
+/* ── Score submission ────────────────────────────────────────
+   Called from gameOver() after every completed game.
+   Only submits if score > 0 and player has a callsign.
+   Shows a toast confirming submission.
+─────────────────────────────────────────────────────────── */
+async function submitScore(score, level, mode, difficulty){
+  if(score <= 0) return;
+  const callsign = OB.getCallsign();
+  if(!callsign || callsign.length < 2) return;
+
+  const {country, flag} = getCountryInfo();
+
+  try{
+    const res = await fetch(`${SB_URL}/rest/v1/leaderboard`, {
+      method: 'POST',
+      headers:{
+        'Content-Type':  'application/json',
+        'apikey':        SB_KEY,
+        'Authorization': `Bearer ${SB_KEY}`,
+        'Prefer':        'return=minimal',
+      },
+      body: JSON.stringify({ callsign, score, level, mode, difficulty, country, flag }),
+    });
+
+    if(res.ok){
+      showSubmitToast(`📡 Score submitted to global ranks`);
+    } else {
+      // Silently ignore — don't interrupt the game experience
+      console.warn('[LB] Submit failed:', res.status);
+    }
+  } catch(e){
+    console.warn('[LB] Submit error:', e.message);
+  }
+}
+
+function showSubmitToast(msg){
+  const t = document.getElementById('submit-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 3200);
+}
+
+/* ── Leaderboard filter state ────────────────────────────── */
+let lbMode  = 'all';     // 'all' | 'classic' | 'reverse' | 'speed' | 'duel' | 'expert'
+let lbDiff  = 'normal';  // 'easy' | 'normal' | 'hard'
+let lbScope = 'weekly';  // 'weekly' | 'alltime'
+let lbCache = {};        // simple cache: key → {data, fetchedAt}
+const LB_CACHE_TTL = 60 * 1000; // 60 seconds
+
+function lbCacheKey(){ return `${lbMode}|${lbDiff}|${lbScope}`; }
+
+function lbSetMode(mode){
+  lbMode = mode;
+  // Update tab highlight
+  document.querySelectorAll('.lb-tab').forEach(t=>{
+    t.classList.toggle('active', t.dataset.mode === mode);
+  });
+  // Hide diff pills on all-time hall of fame
+  document.getElementById('lb-diff-pills').style.display =
+    mode === 'all' ? 'none' : '';
+  fetchAndRender();
+}
+
+function lbSetDiff(diff){
+  lbDiff = diff;
+  document.querySelectorAll('.lb-diff-pill').forEach(p=>{
+    p.className = 'lb-diff-pill';
+    if(p.dataset.diff === diff) p.classList.add(`active-${diff}`);
+  });
+  fetchAndRender();
+}
+
+function lbSetScope(scope){
+  lbScope = scope;
+  document.querySelectorAll('.lb-scope-btn').forEach(b=>{
+    b.classList.toggle('active', b.dataset.scope === scope);
+  });
+  fetchAndRender();
+}
+
+/* ── Fetch from Supabase ──────────────────────────────────── */
+async function fetchLeaderboard(){
+  const key = lbCacheKey();
+  const cached = lbCache[key];
+  if(cached && Date.now() - cached.fetchedAt < LB_CACHE_TTL){
+    return cached.data;
+  }
+
+  let url = `${SB_URL}/rest/v1/leaderboard?select=callsign,score,level,mode,difficulty,flag,country,created_at&order=score.desc&limit=100`;
+
+  if(lbMode !== 'all'){
+    url += `&mode=eq.${lbMode}&difficulty=eq.${lbDiff}`;
+  }
+
+  if(lbScope === 'weekly'){
+    const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+    url += `&created_at=gte.${weekAgo}`;
+  }
+
+  const res = await fetch(url, {
+    headers:{
+      'apikey':        SB_KEY,
+      'Authorization': `Bearer ${SB_KEY}`,
+    }
+  });
+
+  if(!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  lbCache[key] = {data, fetchedAt: Date.now()};
+  return data;
+}
+
+/* ── Render leaderboard page ─────────────────────────────── */
+function renderRanksPage(){
+  fetchAndRender();
+}
+
+async function fetchAndRender(){
+  const wrap = document.getElementById('lb-wrap');
+  wrap.innerHTML = `<div class="lb-state"><span class="lb-spinner">⟳</span>Loading…</div>`;
+  document.getElementById('lb-my-rank').classList.remove('show');
+
+  try{
+    const rows = await fetchLeaderboard();
+
+    if(!rows || rows.length === 0){
+      wrap.innerHTML = `<div class="lb-state">No scores yet for this board.<br>Be the first! 🏆</div>`;
+      return;
+    }
+
+    // Find my rank
+    const myCallsign = (OB.getCallsign()||'').toUpperCase();
+    let myRank = -1, myRow = null;
+
+    // Build HTML
+    let html = '';
+    rows.forEach((r, i)=>{
+      const pos  = i + 1;
+      const posClass = pos===1?'gold':pos===2?'silver':pos===3?'bronze':'';
+      const posLabel = pos===1?'🥇':pos===2?'🥈':pos===3?'🥉':pos;
+      const date = new Date(r.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+      const modeBadge = r.mode ? `${r.mode.toUpperCase()} · ${(r.difficulty||'').toUpperCase()}` : '';
+
+      if(myCallsign && r.callsign.toUpperCase()===myCallsign && myRank===-1){
+        myRank = pos; myRow = r;
+      }
+
+      html += `
+        <div class="lb-row">
+          <div class="lb-pos ${posClass}">${posLabel}</div>
+          <div class="lb-flag">${r.flag||'🌍'}</div>
+          <div class="lb-info">
+            <span class="lb-name">${escHtml(r.callsign)}</span>
+            <span class="lb-meta">${modeBadge ? modeBadge+' · ' : ''}${date}</span>
+          </div>
+          <div>
+            <div class="lb-score">${r.score}</div>
+            <div class="lb-level">LVL ${r.level}</div>
+          </div>
+        </div>`;
+    });
+
+    wrap.innerHTML = html;
+
+    // Show my rank card
+    if(myRank > 0 && myRow){
+      document.getElementById('lb-my-pos').textContent   = `#${myRank}`;
+      document.getElementById('lb-my-name').textContent  = myRow.callsign;
+      document.getElementById('lb-my-score').textContent = myRow.score;
+      document.getElementById('lb-my-level').textContent = `LVL ${myRow.level}`;
+      document.getElementById('lb-my-sub').textContent   =
+        myRank <= 10 ? '🔥 You\'re in the top 10!' :
+        myRank <= 50 ? 'Top 50 — keep climbing!' : 'Your best on this board';
+      document.getElementById('lb-my-rank').classList.add('show');
+    } else if(myCallsign){
+      // Player has a score but not in top 100 — query their rank separately
+      loadMyRankOutside(myCallsign);
+    }
+
+  } catch(e){
+    wrap.innerHTML = `<div class="lb-state">Couldn't load rankings.<br>Check your connection and try again.</div>`;
+    console.warn('[LB] Fetch error:', e.message);
+  }
+}
+
+/* Fetch player's rank if they're outside the top 100 */
+async function loadMyRankOutside(callsign){
+  try{
+    // Count how many scores are higher than the player's best
+    const mds = loadMDS(
+      lbMode === 'all' ? 'classic' : lbMode,
+      lbMode === 'all' ? 'normal'  : lbDiff
+    );
+    if(mds.best <= 0) return;
+
+    let url = `${SB_URL}/rest/v1/leaderboard?select=id&score=gt.${mds.best}`;
+    if(lbMode !== 'all') url += `&mode=eq.${lbMode}&difficulty=eq.${lbDiff}`;
+    if(lbScope === 'weekly'){
+      const weekAgo = new Date(Date.now()-7*24*60*60*1000).toISOString();
+      url += `&created_at=gte.${weekAgo}`;
+    }
+    url += '&limit=1000';
+
+    const res  = await fetch(url,{headers:{'apikey':SB_KEY,'Authorization':`Bearer ${SB_KEY}`}});
+    const data = await res.json();
+    const rank = (data?.length || 0) + 1;
+
+    document.getElementById('lb-my-pos').textContent   = `#${rank}`;
+    document.getElementById('lb-my-name').textContent  = callsign;
+    document.getElementById('lb-my-score').textContent = mds.best;
+    document.getElementById('lb-my-level').textContent = `LVL ${mds.bestLevel}`;
+    document.getElementById('lb-my-sub').textContent   = 'Outside top 100 — keep playing!';
+    document.getElementById('lb-my-rank').classList.add('show');
+  } catch(_){}
+}
+
+function escHtml(s){
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+/* ── Hook score submission into gameOver ─────────────────── */
+/* This patches gameOver to call submitScore after tracking.
+   We append it here so it runs after gameOver is defined.   */
+const _origGameOver = gameOver;
+async function gameOver(reason='miss'){
+  await _origGameOver(reason);
+  // Submit score to global leaderboard (non-blocking)
+  if(score > 0 && !dailyMode){
+    submitScore(score, level-1, getModeName(), getDiffName());
+  }
 }
 </script>
 </html>
