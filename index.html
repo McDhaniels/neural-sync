@@ -670,6 +670,101 @@ header{text-align:center;padding-top:.1rem}
    SELECTORS
 ══════════════════════════════════════════════ */
 .sel-bar{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;flex-wrap:wrap}
+
+/* ══════════════════════════════════════════════
+   LOBBY PAGE
+   Mode cards + difficulty cards before gameplay.
+══════════════════════════════════════════════ */
+.lobby-section-title{
+  font-family:'Share Tech Mono',monospace;font-size:.58rem;
+  letter-spacing:.22em;color:var(--dim);
+  align-self:flex-start;margin-bottom:-.2rem;
+}
+/* 2-col mode card grid with last card (Expert) spanning full width */
+.mode-card-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:.65rem;width:100%;
+}
+.mode-card{
+  background:var(--surface);border:2px solid var(--border);
+  border-radius:16px;padding:.9rem .85rem;cursor:pointer;
+  display:flex;flex-direction:column;gap:.35rem;
+  position:relative;overflow:hidden;
+  transition:border-color .2s,transform .13s,background .2s;
+}
+.mode-card:hover:not(.mc-locked){border-color:var(--dim);transform:scale(1.02)}
+.mode-card.mc-selected{border-color:var(--accent);background:rgba(184,184,255,.06)}
+.mode-card.mc-locked{cursor:default;opacity:.55}
+/* Expert spans full width */
+.mode-card.mc-full{grid-column:1/-1;flex-direction:row;align-items:center;gap:.9rem;padding:.8rem 1rem}
+.mode-card.mc-full .mc-desc{flex:1}
+.mc-icon{font-size:1.4rem;line-height:1;margin-bottom:.1rem}
+.mc-name{
+  font-size:.75rem;font-weight:700;letter-spacing:.1em;
+  color:var(--text);
+}
+.mc-desc{
+  font-family:'Share Tech Mono',monospace;font-size:.48rem;
+  color:var(--dim);letter-spacing:.04em;line-height:1.5;
+}
+.mc-best{
+  font-family:'Orbitron',monospace;font-size:.58rem;
+  color:var(--accent);font-weight:700;margin-top:.2rem;
+  letter-spacing:.08em;
+}
+.mc-lock-badge{
+  position:absolute;top:6px;right:8px;
+  font-family:'Share Tech Mono',monospace;font-size:.44rem;
+  color:var(--dim);
+}
+.mode-card.mc-selected .mc-name{color:var(--accent)}
+.mode-card.mc-selected::before{
+  content:'✓';position:absolute;top:6px;right:8px;
+  font-size:.65rem;color:var(--accent);font-weight:900;
+}
+.mode-card.mc-locked::before{content:none}
+
+/* Difficulty cards — 3-col row */
+.diff-card-row{display:flex;gap:.6rem;width:100%}
+.diff-card{
+  flex:1;background:var(--surface);border:2px solid var(--border);
+  border-radius:14px;padding:.75rem .5rem;cursor:pointer;
+  text-align:center;
+  transition:border-color .2s,transform .13s,background .2s;
+}
+.diff-card:hover{border-color:var(--dim);transform:scale(1.03)}
+.diff-card.dc-selected{border-color:var(--accent);background:rgba(184,184,255,.06)}
+.diff-card.dc-selected .dc-name{color:var(--accent)}
+.dc-icon{font-size:1.1rem;display:block;margin-bottom:.25rem}
+.dc-name{
+  font-size:.72rem;font-weight:700;letter-spacing:.1em;
+  color:var(--text);display:block;margin-bottom:.2rem;
+}
+.dc-desc{
+  font-family:'Share Tech Mono',monospace;font-size:.44rem;
+  color:var(--dim);letter-spacing:.04em;display:block;
+  line-height:1.4;
+}
+.dc-speed{
+  font-family:'Orbitron',monospace;font-size:.5rem;
+  color:var(--dim);display:block;margin-top:.2rem;
+}
+
+/* Mode badge shown on game screen */
+.mode-badge-row{
+  display:flex;align-items:center;justify-content:center;gap:.5rem;
+  flex-wrap:wrap;
+}
+.mode-badge{
+  font-family:'Share Tech Mono',monospace;font-size:.55rem;
+  letter-spacing:.12em;padding:3px 9px;border-radius:6px;
+  border:1px solid var(--border);color:var(--dim);
+  background:var(--surface);
+}
+.mode-badge.mb-mode{color:var(--accent);border-color:var(--accent)}
+.mode-badge.mb-diff-easy{color:var(--green);border-color:var(--green)}
+.mode-badge.mb-diff-normal{color:var(--yellow);border-color:var(--yellow)}
+.mode-badge.mb-diff-hard{color:var(--red);border-color:var(--red)}
 .sel-option input[type="radio"]{display:none}
 .sel-option label{display:block;font-family:'Share Tech Mono',monospace;font-size:.58rem;letter-spacing:.08em;padding:.28rem .65rem;border-radius:7px;cursor:pointer;color:var(--dim);transition:background .18s,color .18s;user-select:none;white-space:nowrap}
 .sel-option input[type="radio"]:checked+label{background:var(--accent);color:var(--bg);font-weight:700}
@@ -1064,7 +1159,7 @@ body.cb .pad.active .pad-icon{opacity:1}
 
   <!-- Nav links -->
   <div class="drawer-nav">
-    <button class="drawer-nav-item active-page" id="dnav-play" onclick="drawerNav('play')">
+    <button class="drawer-nav-item active-page" id="dnav-lobby" onclick="drawerNav('lobby')">
       <span class="drawer-nav-icon">▶</span>
       <div class="drawer-nav-texts">
         <span class="drawer-nav-label">PLAY</span>
@@ -1145,14 +1240,99 @@ body.cb .pad.active .pad-icon{opacity:1}
 
 <div class="page-area">
 
-  <!-- ══════════════ PAGE: PLAY ══════════════ -->
-  <div class="page active" id="page-play">
+  <!-- ══════════════ PAGE: LOBBY ══════════════ -->
+  <div class="page active" id="page-lobby">
 
     <header>
       <div class="game-title">Neural Sync</div>
-      <div class="game-subtitle">MEMORY SEQUENCE CHALLENGE</div>
+      <div class="game-subtitle" id="lobby-callsign-sub">MEMORY SEQUENCE CHALLENGE</div>
+    </header>
+
+    <span class="lobby-section-title">SELECT MODE</span>
+
+    <div class="mode-card-grid" id="mode-card-grid">
+
+      <div class="mode-card mc-selected" id="mc-classic" onclick="lobbySelectMode('classic')">
+        <span class="mc-icon">▶</span>
+        <span class="mc-name">CLASSIC</span>
+        <span class="mc-desc">Watch the sequence and repeat it back. Grows one step every round.</span>
+        <span class="mc-best" id="mcb-classic">BEST —</span>
+      </div>
+
+      <div class="mode-card" id="mc-reverse" onclick="lobbySelectMode('reverse')">
+        <span class="mc-icon">↩</span>
+        <span class="mc-name">REVERSE</span>
+        <span class="mc-desc">Same rules — but replay the sequence backwards. Big brain challenge.</span>
+        <span class="mc-best" id="mcb-reverse">BEST —</span>
+      </div>
+
+      <div class="mode-card" id="mc-speed" onclick="lobbySelectMode('speed')">
+        <span class="mc-icon">⏱</span>
+        <span class="mc-name">SPEED RUN</span>
+        <span class="mc-desc">60 seconds on the clock. Wrong press = −5s. Beat the timer.</span>
+        <span class="mc-best" id="mcb-speed">BEST —</span>
+      </div>
+
+      <div class="mode-card" id="mc-duel" onclick="lobbySelectMode('duel')">
+        <span class="mc-icon">⚔</span>
+        <span class="mc-name">DUEL</span>
+        <span class="mc-desc">Pass-and-play vs a friend. Each player builds their own run to 150pts.</span>
+        <span class="mc-best" id="mcb-duel">BEST —</span>
+      </div>
+
+      <div class="mode-card mc-full mc-locked" id="mc-expert">
+        <span class="mc-icon" style="opacity:.45">✦</span>
+        <div class="mc-desc">
+          <span class="mc-name" style="opacity:.55;display:block;margin-bottom:.2rem">EXPERT MODE</span>
+          5-pad diamond layout. Sequences grow faster. Reach Level 20 in any mode to unlock.
+        </div>
+        <span class="mc-lock-badge">🔒 LVL 20</span>
+      </div>
+
+    </div>
+
+    <span class="lobby-section-title">SELECT DIFFICULTY</span>
+
+    <div class="diff-card-row">
+      <div class="diff-card" id="dc-easy" onclick="lobbySelectDiff('easy')">
+        <span class="dc-icon">🟢</span>
+        <span class="dc-name">EASY</span>
+        <span class="dc-desc">Slower flashes.<br>More time to think.</span>
+        <span class="dc-speed">650ms</span>
+      </div>
+      <div class="diff-card dc-selected" id="dc-normal" onclick="lobbySelectDiff('normal')">
+        <span class="dc-icon">🟡</span>
+        <span class="dc-name">NORMAL</span>
+        <span class="dc-desc">Balanced pace.<br>The standard challenge.</span>
+        <span class="dc-speed">420ms</span>
+      </div>
+      <div class="diff-card" id="dc-hard" onclick="lobbySelectDiff('hard')">
+        <span class="dc-icon">🔴</span>
+        <span class="dc-name">HARD</span>
+        <span class="dc-desc">Fast flashes.<br>No mercy.</span>
+        <span class="dc-speed">250ms</span>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="lobby-launch-btn" onclick="launchFromLobby()" style="width:100%;max-width:300px;font-size:.85rem;padding:.85rem">
+      ▶ PLAY NOW
+    </button>
+
+  </div><!-- end page-lobby -->
+
+  <!-- ══════════════ PAGE: PLAY ══════════════ -->
+  <div class="page" id="page-play">
+
+    <header>
+      <div class="game-title">Neural Sync</div>
       <div class="callsign-line" id="callsign-line" style="display:none"><span id="callsign-display"></span></div>
     </header>
+
+    <!-- Mode + Difficulty badge row -->
+    <div class="mode-badge-row" id="mode-badge-row">
+      <span class="mode-badge mb-mode" id="badge-mode">CLASSIC</span>
+      <span class="mode-badge mb-diff-normal" id="badge-diff">NORMAL</span>
+    </div>
 
     <div class="stats">
       <div class="stat-box"><span class="stat-label">Level</span><span class="stat-value" id="level-val">1</span></div>
@@ -1161,7 +1341,7 @@ body.cb .pad.active .pad-icon{opacity:1}
       <div class="stat-box" id="streak-box"><span class="stat-label">Streak</span><span class="stat-value" id="streak-val">—</span></div>
     </div>
 
-    <!-- Duel score bar (hidden unless duel mode active) -->
+    <!-- Duel score bar -->
     <div class="duel-bar hidden" id="duel-bar">
       <div class="duel-player active" id="duel-p1-box">
         <span class="duel-player-score" id="duel-p1-score">0</span>
@@ -1181,29 +1361,23 @@ body.cb .pad.active .pad-icon{opacity:1}
       <span class="combo-mult x2" id="combo-mult">×2</span>
     </div>
 
-    <!-- AI difficulty indicator -->
     <div class="ai-indicator hidden" id="ai-indicator">
       <span style="font-family:'Share Tech Mono',monospace;font-size:.5rem;letter-spacing:.1em">AI ADAPT</span>
       <span class="ai-badge optimal" id="ai-badge">● BALANCED</span>
     </div>
 
-    <p class="status" id="status-msg">Choose mode &amp; difficulty, then START</p>
+    <p class="status" id="status-msg">Get ready…</p>
 
-    <div class="sel-row">
-      <span class="sel-section-label">MODE</span>
-      <div class="sel-bar">
-        <div class="sel-option"><input type="radio" name="mode" id="m-classic" value="classic" checked><label for="m-classic">CLASSIC</label></div>
-        <div class="sel-option"><input type="radio" name="mode" id="m-reverse" value="reverse"><label for="m-reverse">REVERSE</label></div>
-        <div class="sel-option"><input type="radio" name="mode" id="m-speed"   value="speed"  ><label for="m-speed">SPEED</label></div>
-        <div class="sel-option"><input type="radio" name="mode" id="m-duel"    value="duel"   ><label for="m-duel">DUEL</label></div>
-        <div class="sel-option" id="expert-opt"><input type="radio" name="mode" id="m-expert" value="expert"><label for="m-expert">EXPERT</label></div>
-      </div>
-      <span class="sel-section-label">DIFFICULTY</span>
-      <div class="sel-bar" id="diff-bar">
-        <div class="sel-option"><input type="radio" name="diff" id="d-easy"   value="easy"  ><label for="d-easy">EASY</label></div>
-        <div class="sel-option"><input type="radio" name="diff" id="d-normal" value="normal" checked><label for="d-normal">NORMAL</label></div>
-        <div class="sel-option"><input type="radio" name="diff" id="d-hard"   value="hard"  ><label for="d-hard">HARD</label></div>
-      </div>
+    <!-- Hidden selectors — lobby sets these, game logic reads them -->
+    <div style="display:none">
+      <input type="radio" name="mode" id="m-classic" value="classic" checked>
+      <input type="radio" name="mode" id="m-reverse" value="reverse">
+      <input type="radio" name="mode" id="m-speed"   value="speed">
+      <input type="radio" name="mode" id="m-duel"    value="duel">
+      <input type="radio" name="mode" id="m-expert"  value="expert">
+      <input type="radio" name="diff" id="d-easy"    value="easy">
+      <input type="radio" name="diff" id="d-normal"  value="normal" checked>
+      <input type="radio" name="diff" id="d-hard"    value="hard">
     </div>
 
     <div class="speed-wrap hidden" id="speed-wrap">
@@ -1211,7 +1385,6 @@ body.cb .pad.active .pad-icon{opacity:1}
       <div class="speed-row"><span class="speed-mode-lbl">SPEED RUN</span><span id="speed-t">60</span>s</div>
     </div>
 
-    <!-- Game pads (5th white pad hidden by default) -->
     <div class="game-grid" id="game-grid">
       <button class="pad" data-color="red"    disabled onclick="handlePress(this)"><span class="pad-icon">▲</span><span class="key-hint" id="kh-red"></span></button>
       <button class="pad" data-color="blue"   disabled onclick="handlePress(this)"><span class="pad-icon">◆</span><span class="key-hint" id="kh-blue"></span></button>
@@ -1222,12 +1395,13 @@ body.cb .pad.active .pad-icon{opacity:1}
 
     <div class="btn-row">
       <button class="btn btn-primary" id="btn-start" onclick="startGame()">▶ START</button>
-      <button class="btn btn-dim" id="btn-share" style="display:none" onclick="shareScore()">↗ SHARE</button>
+      <button class="btn btn-dim"     id="btn-back"  onclick="showPage('lobby')" style="font-size:.65rem">‹ BACK</button>
+      <button class="btn btn-dim"     id="btn-share" style="display:none" onclick="shareScore()">↗ SHARE</button>
     </div>
 
     <p class="hs-saved" id="hs-saved"></p>
 
-    <!-- Duel handoff overlay — covers pads between player turns -->
+    <!-- Duel handoff overlay -->
     <div class="duel-handoff" id="duel-handoff">
       <div class="duel-handoff-player" id="duel-handoff-player">P2</div>
       <div class="duel-handoff-title" id="duel-handoff-title">PLAYER 2'S TURN</div>
@@ -1490,7 +1664,7 @@ body.cb .pad.active .pad-icon{opacity:1}
 </div><!-- page-area -->
 
 <nav class="bottom-nav">
-  <button class="nav-btn active" id="nav-play"     onclick="showPage('play')"    ><span class="nav-icon">▶</span><span>PLAY</span></button>
+  <button class="nav-btn active" id="nav-lobby"    onclick="showPage('lobby')"   ><span class="nav-icon">▶</span><span>PLAY</span></button>
   <button class="nav-btn"        id="nav-daily"    onclick="showPage('daily')"   ><span class="nav-icon">◈</span><span>DAILY</span></button>
   <button class="nav-btn"        id="nav-profile"  onclick="showPage('profile')" ><span class="nav-icon">★</span><span>PROFILE</span></button>
   <button class="nav-btn"        id="nav-settings" onclick="showPage('settings')"><span class="nav-icon">⚙</span><span>SETTINGS</span></button>
@@ -1502,7 +1676,7 @@ body.cb .pad.active .pad-icon{opacity:1}
    PAGE NAVIGATION
 ══════════════════════════════════════════════ */
 const PAGE_TITLES = {
-  play:'NEURAL SYNC', daily:'DAILY CHALLENGE',
+  lobby:'SELECT MODE', play:'NEURAL SYNC', daily:'DAILY CHALLENGE',
   profile:'PROFILE', settings:'SETTINGS'
 };
 
@@ -1510,13 +1684,15 @@ function showPage(n){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+n).classList.add('active');
-  document.getElementById('nav-'+n).classList.add('active');
-  // Update header title
+  // Nav: lobby and play both light up the PLAY nav button
+  const navId = (n==='play') ? 'nav-lobby' : 'nav-'+n;
+  const navEl = document.getElementById(navId);
+  if(navEl) navEl.classList.add('active');
   document.getElementById('header-title').textContent = PAGE_TITLES[n]||'NEURAL SYNC';
-  // Update drawer active state
   document.querySelectorAll('.drawer-nav-item[id^="dnav-"]').forEach(b=>b.classList.remove('active-page'));
-  const dn=document.getElementById('dnav-'+n);
+  const dn=document.getElementById('dnav-'+(n==='play'?'lobby':n));
   if(dn)dn.classList.add('active-page');
+  if(n==='lobby')    renderLobbyPage();
   if(n==='daily')    renderDailyPage();
   if(n==='profile')  renderProfilePage();
   if(n==='settings') renderSettingsPage();
@@ -1700,6 +1876,93 @@ const st={
   loadHist:  ()=>JSON.parse(localStorage.getItem(K.hist)||'[]'),
   saveHist:  h=>localStorage.setItem(K.hist,JSON.stringify(h)),
 };
+/* ════════════════════════════════════════════════════
+   PER-MODE-DIFF SCORE STORAGE
+════════════════════════════════════════════════════ */
+function mdsKey(mode,diff){return`ns7_mds_${mode}_${diff}`;}
+function loadMDS(mode,diff){return JSON.parse(localStorage.getItem(mdsKey(mode,diff))||'{"best":0,"bestLevel":0,"games":0}');}
+function saveMDS(mode,diff,data){localStorage.setItem(mdsKey(mode,diff),JSON.stringify(data));}
+function updateMDS(mode,diff,score,level){
+  const d=loadMDS(mode,diff);d.games++;
+  let improved=false;
+  if(score>d.best){d.best=score;improved=true;}
+  if(level>d.bestLevel)d.bestLevel=level;
+  saveMDS(mode,diff,d);return improved;
+}
+
+/* ════════════════════════════════════════════════════
+   LOBBY STATE & FUNCTIONS
+════════════════════════════════════════════════════ */
+let lobbyMode='classic', lobbyDiff='normal';
+const MODE_NAMES={classic:'CLASSIC',reverse:'REVERSE',speed:'SPEED RUN',duel:'DUEL',expert:'EXPERT'};
+const DIFF_COLORS={easy:'mb-diff-easy',normal:'mb-diff-normal',hard:'mb-diff-hard'};
+
+function lobbySelectMode(mode){
+  const s=st.loadStats();
+  if(mode==='expert'&&s.bestLevel<20)return;
+  lobbyMode=mode;
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('mc-selected'));
+  const card=document.getElementById('mc-'+mode);
+  if(card)card.classList.add('mc-selected');
+  updateLobbyButton();
+}
+
+function lobbySelectDiff(diff){
+  lobbyDiff=diff;
+  document.querySelectorAll('.diff-card').forEach(c=>c.classList.remove('dc-selected'));
+  const card=document.getElementById('dc-'+diff);
+  if(card)card.classList.add('dc-selected');
+  updateLobbyButton();refreshLobbyBests();
+}
+
+function updateLobbyButton(){
+  const btn=document.getElementById('lobby-launch-btn');
+  if(btn)btn.textContent=`▶ PLAY ${MODE_NAMES[lobbyMode]||lobbyMode.toUpperCase()} · ${lobbyDiff.toUpperCase()}`;
+}
+
+function refreshLobbyBests(){
+  ['classic','reverse','speed','duel','expert'].forEach(m=>{
+    const d=loadMDS(m,lobbyDiff);
+    const el=document.getElementById('mcb-'+m);
+    if(el)el.textContent=d.best>0?`BEST ${d.best} pts · LVL ${d.bestLevel}`:'BEST —';
+  });
+}
+
+function renderLobbyPage(){
+  const cs=OB.getCallsign();
+  const sub=document.getElementById('lobby-callsign-sub');
+  if(sub)sub.textContent=cs?`▸ ${cs}`:'MEMORY SEQUENCE CHALLENGE';
+  document.querySelectorAll('.mode-card').forEach(c=>c.classList.remove('mc-selected'));
+  const mc=document.getElementById('mc-'+lobbyMode);if(mc)mc.classList.add('mc-selected');
+  document.querySelectorAll('.diff-card').forEach(c=>c.classList.remove('dc-selected'));
+  const dc=document.getElementById('dc-'+lobbyDiff);if(dc)dc.classList.add('dc-selected');
+  // Unlock expert if eligible
+  const s=st.loadStats();
+  const expertCard=document.getElementById('mc-expert');
+  if(expertCard&&s.bestLevel>=20){
+    expertCard.classList.remove('mc-locked');
+    expertCard.onclick=()=>lobbySelectMode('expert');
+    const lk=expertCard.querySelector('.mc-lock-badge');if(lk)lk.remove();
+  }
+  refreshLobbyBests();updateLobbyButton();
+}
+
+function launchFromLobby(){
+  const mEl=document.getElementById('m-'+lobbyMode);if(mEl)mEl.checked=true;
+  const dEl=document.getElementById('d-'+lobbyDiff);if(dEl)dEl.checked=true;
+  const bm=document.getElementById('badge-mode');
+  const bd=document.getElementById('badge-diff');
+  if(bm)bm.textContent=MODE_NAMES[lobbyMode]||lobbyMode.toUpperCase();
+  if(bd){bd.textContent=lobbyDiff.toUpperCase();bd.className=`mode-badge ${DIFF_COLORS[lobbyDiff]||'mb-diff-normal'}`;}
+  const mds=loadMDS(lobbyMode,lobbyDiff);
+  highScore=mds.best;
+  if(hsEl)hsEl.textContent=mds.best>0?mds.best:'—';
+  if(hsSaved)hsSaved.innerHTML=mds.best>0?`Best in this mode: <span>${mds.best} pts</span>`:'';
+  showPage('play');
+  updateGridLayout();
+  startGame();
+}
+
 function todayStr(){const d=new Date();return`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;}
 function dailyKey(){return`ns7_daily_${todayStr()}`;}
 function hasDailyDone(){return localStorage.getItem(dailyKey())!==null;}
@@ -2039,12 +2302,20 @@ document.querySelectorAll('.pad').forEach(p=>{
 function updateExpertLock(){
   const s=st.loadStats();
   const unlocked=s.bestLevel>=20;
-  const opt=document.getElementById('expert-opt');
-  opt.classList.toggle('locked',!unlocked);
-  if(!unlocked){
-    const lbl=opt.querySelector('label');
-    lbl.title='Reach level 20 in any mode to unlock Expert';
+  // Lobby card
+  const card=document.getElementById('mc-expert');
+  if(card){
+    card.classList.toggle('mc-locked',!unlocked);
+    if(unlocked){
+      card.onclick=()=>lobbySelectMode('expert');
+      const lk=card.querySelector('.mc-lock-badge');if(lk)lk.remove();
+    } else {
+      card.onclick=null;
+    }
   }
+  // Legacy play-page opt (hidden but kept for radio logic)
+  const opt=document.getElementById('expert-opt');
+  if(opt) opt.classList.toggle('locked',!unlocked);
 }
 
 function getActiveColors(){
@@ -2233,7 +2504,7 @@ function renderSettingsPage(){
 ══════════════════════════════════════════════ */
 const COLORS_4=['red','blue','green','yellow'];
 let sequence=[],playerInput=[],level=1,score=0;
-let highScore=st.loadHS(),isPlaying=false,canPress=false;
+let highScore=0,isPlaying=false,canPress=false;
 let dailyMode=false,dailyRng=null,correctThisGame=0;
 
 const statusEl=document.getElementById('status-msg');
@@ -2242,11 +2513,9 @@ const hsEl    =document.getElementById('hs-val');
 const hsSaved =document.getElementById('hs-saved');
 const hsBox   =document.getElementById('hs-box');
 const startBtn=document.getElementById('btn-start');
-const diffBar =document.getElementById('diff-bar');
 const pads    =document.querySelectorAll('.pad');
 
 /* ── Init ── */
-if(highScore>0){hsEl.textContent=highScore;hsSaved.innerHTML=`Best: <span>${highScore} pts</span>`;}
 refreshStreakDisplay(st.loadStreak().count);
 buildAchGrid();
 updateExpertLock();
@@ -2257,6 +2526,12 @@ updateExpertLock();
   const savedAI=localStorage.getItem('ns7_ai');if(savedAI==='0'){AI.on=false;}
   const savedKH=localStorage.getItem('ns7_keyhints');if(savedKH==='1')setKeyHints(true);
   const savedTheme=localStorage.getItem('ns7_theme');if(savedTheme&&THEMES[savedTheme])applyTheme(savedTheme);
+  const savedVol=localStorage.getItem('ns7_vol');
+  if(savedVol!==null){
+    masterVol=Number(savedVol);
+    const sl=document.getElementById('vol-slider');const pt=document.getElementById('vol-pct');
+    if(sl)sl.value=masterVol;if(pt)pt.textContent=masterVol+'%';
+  }
 })();
 
 if(!hasDailyDone()){
@@ -2311,16 +2586,19 @@ const OB = {
     document.getElementById(id).classList.add('ob-active');
   },
 
-  /* Finish onboarding — dismiss overlay, apply selections */
+  /* Finish onboarding — dismiss overlay, go to lobby */
   finish(){
     refreshCallsignUI(this.getCallsign());
-    obApplySelections();
+    // Sync lobby with whatever was chosen in onboarding
+    lobbyMode = obSelectedMode || 'classic';
+    lobbyDiff = obSelectedDiff || 'normal';
     const el=document.getElementById('onboarding');
     el.classList.add('ob-exit');
     setTimeout(()=>{
       el.style.display='none';
       el.classList.remove('ob-exit');
       document.getElementById('top-header').style.display='';
+      showPage('lobby');
       updateExpertLock();
     }, 600);
   },
@@ -2557,17 +2835,7 @@ function applyUpdate() {
   document.getElementById('update-banner').classList.remove('show');
 }
 
-// Restore saved volume
-(()=>{
-  const savedVol = localStorage.getItem('ns7_vol');
-  if(savedVol !== null){
-    masterVol = Number(savedVol);
-    const sl = document.getElementById('vol-slider');
-    const pt = document.getElementById('vol-pct');
-    if(sl) sl.value = masterVol;
-    if(pt) pt.textContent = masterVol + '%';
-  }
-})();
+// Volume restore is handled in the main init block above.
 
 /* ══════════════════════════════════════════════
    HELPERS
@@ -2585,7 +2853,10 @@ function flash(color,dur){
 }
 
 function lockSelectors(on){
-  [diffBar,...document.querySelectorAll('.sel-bar')].forEach(b=>{b.style.pointerEvents=on?'none':'';b.style.opacity=on?'0.4':'';});
+  // Selectors now live on the lobby page — nothing to lock on the play page.
+  // Only lock the diff-bar reference if it still exists (for legacy compatibility).
+  const db=document.getElementById('diff-bar');
+  if(db){db.style.pointerEvents=on?'none':'';db.style.opacity=on?'0.4':'';}
 }
 
 /* ══════════════════════════════════════════════
@@ -2601,10 +2872,11 @@ function beginGame(){
   levelEl.textContent=level;scoreEl.textContent=score;
   hsBox.classList.remove('new-record');refreshCombo();
   document.getElementById('btn-share').style.display='none';
+  document.getElementById('btn-back').style.display='none'; // hide during play
   startBtn.textContent='↺ RESTART';
   AI.reset();
 
-  updateGridLayout(); // apply expert layout if selected
+  updateGridLayout();
 
   if(getModeName()==='duel'){
     duel.start();
@@ -2612,7 +2884,7 @@ function beginGame(){
     duel.reset();
   }
 
-  lockSelectors(true);startBgMusic();
+  startBgMusic();
   if(getModeName()==='speed')startSpeedTimer();
   nextRound();
 }
@@ -2738,26 +3010,35 @@ async function gameOver(reason='miss'){
     const dot=document.getElementById('nav-daily').querySelector('.nav-dot');if(dot)dot.remove();
   }
 
-  if(score>highScore){
-    highScore=score;st.saveHS(highScore);
-    hsEl.textContent=highScore;
+  // Per-mode-diff best tracking
+  const newMDSBest = updateMDS(getModeName(), getDiffName(), score, level);
+  // Also keep global all-time best for achievements / profile
+  if(score > st.loadHS()) st.saveHS(score);
+
+  if(newMDSBest){
+    highScore=score;
+    hsEl.textContent=score;
     hsBox.classList.add('new-record');
-    hsSaved.innerHTML=`★ NEW RECORD: <span>${highScore} pts</span>`;
+    hsSaved.innerHTML=`★ NEW ${MODE_NAMES[getModeName()]||getModeName().toUpperCase()} BEST: <span>${score} pts</span>`;
     confetti();playNewRecord();vibe([100,50,100,50,300]);
-    setStatus(`★ INCREDIBLE${getCallsignGreeting()}! New record — Level ${level}!`,'record');
-    // Show review prompt on first personal best (delayed so they enjoy the moment first)
+    setStatus(`★ INCREDIBLE${getCallsignGreeting()}! New ${MODE_NAMES[getModeName()]} record — Level ${level}!`,'record');
     setTimeout(()=>showReviewPrompt('record'),3500);
   } else {
-    hsSaved.innerHTML=highScore>0?`Best: <span>${highScore} pts</span>`:'';
+    const mds=loadMDS(getModeName(),getDiffName());
+    hsSaved.innerHTML=mds.best>0?`Best in this mode: <span>${mds.best} pts</span>`:'';
     const cs=getCallsignGreeting();
     setStatus(reason==='timeout'?`TIME UP${cs} — Score: ${score}`:`GAME OVER${cs} — Level ${level} · ${score} pts`,'error');
   }
+  // Always refresh Best box
+  const latestMDS=loadMDS(getModeName(),getDiffName());
+  hsEl.textContent=latestMDS.best>0?latestMDS.best:'—';
 
-  checkAch();updateExpertLock();
+  checkAch();updateExpertLock();renderLobbyPage();
 
   startBtn.textContent='▶ PLAY AGAIN';
   document.getElementById('btn-share').style.display='';
-  dailyMode=false;lockSelectors(false);
+  document.getElementById('btn-back').style.display='';
+  dailyMode=false;
   updateGridLayout();
 }
 
@@ -2790,11 +3071,39 @@ function renderDailyPage(){
 }
 
 function launchDailyFromPage(){
-  dailyMode=true;dailyRng=makeLCG(parseInt(todayStr()));
-  const cl=document.getElementById('m-classic');if(cl)cl.checked=true;
+  /*
+    Daily Challenge: use today's date seed to pick a random
+    mode and difficulty — the same combination for everyone worldwide.
+    The game sequence itself is also seeded, so two players who both
+    get "REVERSE · HARD" today will face the exact same sequence.
+  */
+  dailyMode = true;
+  const seedRng = makeLCG(parseInt(todayStr()) + 777); // +777 so mode seed differs from sequence seed
+  const modes = ['classic','reverse','speed','classic','classic']; // classic weighted more often
+  const diffs = ['easy','normal','normal','hard'];
+  const dailyModeChoice = modes[Math.floor(seedRng() * modes.length)];
+  const dailyDiffChoice = diffs[Math.floor(seedRng() * diffs.length)];
+
+  // Apply the daily mode+diff to the hidden radios
+  const mEl=document.getElementById('m-'+dailyModeChoice);if(mEl)mEl.checked=true;
+  const dEl=document.getElementById('d-'+dailyDiffChoice);if(dEl)dEl.checked=true;
+
+  // Update the game screen badges
+  const bm=document.getElementById('badge-mode');
+  const bd=document.getElementById('badge-diff');
+  if(bm)bm.textContent=(MODE_NAMES[dailyModeChoice]||dailyModeChoice.toUpperCase())+' · DAILY';
+  if(bd){bd.textContent=dailyDiffChoice.toUpperCase();bd.className=`mode-badge ${DIFF_COLORS[dailyDiffChoice]||'mb-diff-normal'}`;}
+
+  // Load mode+diff specific best
+  const mds=loadMDS(dailyModeChoice,dailyDiffChoice);
+  highScore=mds.best;
+  if(hsEl)hsEl.textContent=mds.best>0?mds.best:'—';
+  if(hsSaved)hsSaved.innerHTML=mds.best>0?`Best in this mode: <span>${mds.best} pts</span>`:'';
+
+  dailyRng=makeLCG(parseInt(todayStr()));
   updateGridLayout();
   showPage('play');
-  setTimeout(()=>{startBtn.textContent='↺ RESTART';beginGame();},60);
+  setTimeout(()=>{ startBtn.textContent='↺ RESTART'; beginGame(); }, 60);
 }
 
 /* ══════════════════════════════════════════════
