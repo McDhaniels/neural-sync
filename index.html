@@ -1315,6 +1315,13 @@ body.cb .pad.active .pad-icon{opacity:1}
       </div>
       <span class="drawer-nav-badge" id="drawer-ach-badge">0/16</span>
     </button>
+    <button class="drawer-nav-item" id="dnav-ranks" onclick="drawerNav('ranks')">
+      <span class="drawer-nav-icon">🏆</span>
+      <div class="drawer-nav-texts">
+        <span class="drawer-nav-label">RANKINGS</span>
+        <span class="drawer-nav-sub">Global leaderboard</span>
+      </div>
+    </button>
 
     <div class="drawer-divider"></div>
 
@@ -3220,6 +3227,11 @@ async function gameOver(reason='miss'){
 
   checkAch();updateExpertLock();renderLobbyPage();
 
+  // Submit to global leaderboard — non-blocking, fires after local state is updated
+  if(score > 0 && !dailyMode){
+    submitScore(score, level > 1 ? level-1 : 1, getModeName(), getDiffName());
+  }
+
   startBtn.textContent='▶ PLAY AGAIN';
   document.getElementById('btn-share').style.display='';
   document.getElementById('btn-back').style.display='';
@@ -3733,18 +3745,6 @@ function escHtml(s){
     .replace(/</g,'&lt;')
     .replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;');
-}
-
-/* ── Hook score submission into gameOver ─────────────────── */
-/* This patches gameOver to call submitScore after tracking.
-   We append it here so it runs after gameOver is defined.   */
-const _origGameOver = gameOver;
-async function gameOver(reason='miss'){
-  await _origGameOver(reason);
-  // Submit score to global leaderboard (non-blocking)
-  if(score > 0 && !dailyMode){
-    submitScore(score, level-1, getModeName(), getDiffName());
-  }
 }
 </script>
 </html>
